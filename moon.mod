@@ -15,12 +15,21 @@ version = "0.1.0"
 
 readme = "README.mbt.md"
 
-repository = ""
+repository = "https://github.com/lin2077-zeming/MoonHook"
 
 license = "Apache-2.0"
 
-keywords = []
+keywords = [
+  "webhook",
+  "delivery",
+  "hmac",
+  "retry",
+  "outbox",
+  "idempotency",
+  "audit",
+  "moonbit",
+]
 
 preferred_target = "wasm-gc"
 
-description = ""
+description = "Lightweight webhook delivery framework for MoonBit with signing, retry, outbox, dead letter, idempotency, and audit."
