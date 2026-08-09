@@ -1,8 +1,10 @@
 import {
   "moonbitlang/core/array",
+  "moonbitlang/core/builtin",
   "moonbitlang/core/debug",
   "moonbitlang/core/hashmap" @map,
   "moonbitlang/core/math",
+  "moonbitlang/core/uint",
 }
 
 import {
