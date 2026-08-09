@@ -1,0 +1,7 @@
+// import {
+//   "lin2077-zeming/MoonHook" @lib,
+// }
+
+options(
+  "is-main": true,
+)
