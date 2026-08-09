@@ -5,6 +5,7 @@ import {
   "moonbitlang/core/encoding/utf8" @utf8,
   "moonbitlang/core/hashmap" @map,
   "moonbitlang/core/math",
+  "moonbitlang/core/ref",
   "moonbitlang/core/uint",
 }
 
