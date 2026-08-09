@@ -1,6 +1,7 @@
 import {
   "moonbitlang/core/array",
   "moonbitlang/core/debug",
+  "moonbitlang/core/hashmap" @map,
   "moonbitlang/core/math",
 }
 
