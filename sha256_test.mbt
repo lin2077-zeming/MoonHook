@@ -17,7 +17,9 @@ test "sha256 abc" {
 ///|
 test "sha256 multi-word message" {
   @test.assert_eq(
-    @MoonHook.sha256_hex(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+    @MoonHook.sha256_hex(
+      b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    ),
     "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
   )
 }

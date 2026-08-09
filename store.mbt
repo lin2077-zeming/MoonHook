@@ -36,14 +36,14 @@ pub fn InMemoryOutbox::enqueue(
   event : WebhookEvent,
   now_ms : Int,
 ) -> Unit {
-  self.entries.push(
-    { hook_id, event, queued_at_ms: now_ms, attempts_used: 0 },
-  )
+  self.entries.push({ hook_id, event, queued_at_ms: now_ms, attempts_used: 0 })
 }
 
 ///|
 /// Returns every pending delivery in FIFO order and empties the outbox.
-pub fn InMemoryOutbox::take_all(self : InMemoryOutbox) -> Array[PendingDelivery] {
+pub fn InMemoryOutbox::take_all(
+  self : InMemoryOutbox,
+) -> Array[PendingDelivery] {
   let result = self.entries.copy()
   while !self.entries.is_empty() {
     self.entries.pop() |> ignore
@@ -80,7 +80,9 @@ pub fn InMemoryDeadLetter::push(
 }
 
 ///|
-pub fn InMemoryDeadLetter::list(self : InMemoryDeadLetter) -> Array[DeadLetterEntry] {
+pub fn InMemoryDeadLetter::list(
+  self : InMemoryDeadLetter,
+) -> Array[DeadLetterEntry] {
   self.entries.copy()
 }
 

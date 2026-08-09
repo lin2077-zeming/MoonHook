@@ -71,14 +71,12 @@ pub fn DeliveryEngine::deliver(
         let mut final_status = DeadLetter
         while attempt_number <= max_attempts {
           let result = (self.transport)(hook, event)
-          attempts.push(
-            {
-              attempt: attempt_number,
-              status_code: result.status_code,
-              error: result.error,
-              duration_ms: result.duration_ms,
-            },
-          )
+          attempts.push({
+            attempt: attempt_number,
+            status_code: result.status_code,
+            error: result.error,
+            duration_ms: result.duration_ms,
+          })
           if result.ok {
             final_status = Success
             break

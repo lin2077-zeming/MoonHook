@@ -1,10 +1,9 @@
 ///|
 test "hmac-sha256 RFC 4231 test case 1" {
   let key = Bytes::from_array([
-    b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b',
-    b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b',
-    b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b',
-    b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b',
+    b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b',
+    b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b', b'\x0b',
+    b'\x0b', b'\x0b',
   ])
   let digest = @MoonHook.hmac_sha256(key, b"Hi There")
   @test.assert_eq(

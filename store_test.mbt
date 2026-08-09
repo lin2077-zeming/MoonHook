@@ -28,15 +28,13 @@ test "outbox enqueues and drains in FIFO order" {
 test "dead letter stores failed deliveries" {
   let dead = @MoonHook.InMemoryDeadLetter::new()
   let event = test_event()
-  dead.push(
-    {
-      hook_id: "orders",
-      event,
-      reason: "max attempts exceeded",
-      failed_at_ms: 300,
-      attempts: 3,
-    },
-  )
+  dead.push({
+    hook_id: "orders",
+    event,
+    reason: "max attempts exceeded",
+    failed_at_ms: 300,
+    attempts: 3,
+  })
   @test.assert_eq(dead.length(), 1)
   let listed = dead.list()
   @test.assert_eq(listed[0].reason, "max attempts exceeded")

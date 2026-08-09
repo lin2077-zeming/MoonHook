@@ -73,7 +73,10 @@ pub fn EventBuilder::with_event_type(
 }
 
 ///|
-pub fn EventBuilder::with_subject(self : EventBuilder, subject : String) -> EventBuilder {
+pub fn EventBuilder::with_subject(
+  self : EventBuilder,
+  subject : String,
+) -> EventBuilder {
   {
     id: self.id,
     event_type: self.event_type,
@@ -85,7 +88,10 @@ pub fn EventBuilder::with_subject(self : EventBuilder, subject : String) -> Even
 }
 
 ///|
-pub fn EventBuilder::with_payload(self : EventBuilder, payload : String) -> EventBuilder {
+pub fn EventBuilder::with_payload(
+  self : EventBuilder,
+  payload : String,
+) -> EventBuilder {
   {
     id: self.id,
     event_type: self.event_type,
@@ -148,7 +154,7 @@ pub fn EventBuilder::build(self : EventBuilder) -> Result[WebhookEvent, String] 
         self.payload,
         self.timestamp_ms,
         key,
-      )
+      ),
     )
   }
 }

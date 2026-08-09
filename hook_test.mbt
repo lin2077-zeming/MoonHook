@@ -32,22 +32,17 @@ test "hook builder updates fields" {
 ///|
 test "hook validation" {
   let missing_id = @MoonHook.Hook::new("", "https://example.com")
-  guard missing_id.validate() is Err(message) else {
-    fail("expected Err")
-  }
+  guard missing_id.validate() is Err(message) else { fail("expected Err") }
   @test.assert_eq(message, "hook id is required")
 
   let missing_url = @MoonHook.Hook::new("orders", "")
-  guard missing_url.validate() is Err(message) else {
-    fail("expected Err")
-  }
+  guard missing_url.validate() is Err(message) else { fail("expected Err") }
   @test.assert_eq(message, "hook url is required")
 
-  let bad_attempts = @MoonHook.Hook::new("orders", "https://example.com")
-    .with_max_attempts(0)
-  guard bad_attempts.validate() is Err(message) else {
-    fail("expected Err")
-  }
+  let bad_attempts = @MoonHook.Hook::new("orders", "https://example.com").with_max_attempts(
+    0,
+  )
+  guard bad_attempts.validate() is Err(message) else { fail("expected Err") }
   @test.assert_eq(message, "max attempts must be at least 1")
 
   let valid = @MoonHook.Hook::new("orders", "https://example.com")

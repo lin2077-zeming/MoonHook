@@ -1,7 +1,8 @@
 ///|
 fn test_hook() -> @MoonHook.Hook {
-  @MoonHook.Hook::new("orders", "https://example.com/hooks/orders")
-    .with_retry_policy(Fixed(10))
+  @MoonHook.Hook::new("orders", "https://example.com/hooks/orders").with_retry_policy(
+    Fixed(10),
+  )
 }
 
 ///|
@@ -12,18 +13,17 @@ test "delivery succeeds on first attempt" {
   let mock = @MoonHook.MockTransport::new([
     @MoonHook.DeliveryResult::success(12),
   ])
-  let engine = @MoonHook.DeliveryEngine::new(
-    registry,
-    mock.as_transport(),
-  )
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
   let event = @MoonHook.EventBuilder::new()
     .with_id("evt-1")
     .with_event_type("order.created")
     .build()
-    |> (result => match result {
-      Ok(event) => event
-      Err(_) => abort("bad event")
-    })
+    |> result => {
+      match result {
+        Ok(event) => event
+        Err(_) => abort("bad event")
+      }
+    }
   let outcome = engine.deliver("orders", event)
   @test.assert_eq(outcome.status, Success)
   @test.assert_eq(outcome.attempts.length(), 1)
@@ -39,18 +39,17 @@ test "delivery retries then succeeds" {
     @MoonHook.DeliveryResult::failure(500, "boom", 10, true),
     @MoonHook.DeliveryResult::success(8),
   ])
-  let engine = @MoonHook.DeliveryEngine::new(
-    registry,
-    mock.as_transport(),
-  )
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
   let event = @MoonHook.EventBuilder::new()
     .with_id("evt-2")
     .with_event_type("order.created")
     .build()
-    |> (result => match result {
-      Ok(event) => event
-      Err(_) => abort("bad event")
-    })
+    |> result => {
+      match result {
+        Ok(event) => event
+        Err(_) => abort("bad event")
+      }
+    }
   let outcome = engine.deliver("orders", event)
   @test.assert_eq(outcome.status, Success)
   @test.assert_eq(outcome.attempts.length(), 2)
@@ -68,18 +67,17 @@ test "delivery dead letters after max attempts" {
     @MoonHook.DeliveryResult::failure(500, "boom", 10, true),
     @MoonHook.DeliveryResult::failure(500, "boom", 10, true),
   ])
-  let engine = @MoonHook.DeliveryEngine::new(
-    registry,
-    mock.as_transport(),
-  )
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
   let event = @MoonHook.EventBuilder::new()
     .with_id("evt-3")
     .with_event_type("order.created")
     .build()
-    |> (result => match result {
-      Ok(event) => event
-      Err(_) => abort("bad event")
-    })
+    |> result => {
+      match result {
+        Ok(event) => event
+        Err(_) => abort("bad event")
+      }
+    }
   let outcome = engine.deliver("orders", event)
   @test.assert_eq(outcome.status, DeadLetter)
   @test.assert_eq(outcome.attempts.length(), 3)
@@ -93,18 +91,17 @@ test "non retryable failure dead letters immediately" {
   let mock = @MoonHook.MockTransport::new([
     @MoonHook.DeliveryResult::failure(400, "bad request", 5, false),
   ])
-  let engine = @MoonHook.DeliveryEngine::new(
-    registry,
-    mock.as_transport(),
-  )
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
   let event = @MoonHook.EventBuilder::new()
     .with_id("evt-4")
     .with_event_type("order.created")
     .build()
-    |> (result => match result {
-      Ok(event) => event
-      Err(_) => abort("bad event")
-    })
+    |> result => {
+      match result {
+        Ok(event) => event
+        Err(_) => abort("bad event")
+      }
+    }
   let outcome = engine.deliver("orders", event)
   @test.assert_eq(outcome.status, DeadLetter)
   @test.assert_eq(outcome.attempts.length(), 1)
@@ -116,18 +113,17 @@ test "missing and inactive hooks are skipped" {
   let hook = test_hook().with_active(false)
   registry.register(hook) |> ignore
   let mock = @MoonHook.MockTransport::new([])
-  let engine = @MoonHook.DeliveryEngine::new(
-    registry,
-    mock.as_transport(),
-  )
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
   let event = @MoonHook.EventBuilder::new()
     .with_id("evt-5")
     .with_event_type("order.created")
     .build()
-    |> (result => match result {
-      Ok(event) => event
-      Err(_) => abort("bad event")
-    })
+    |> result => {
+      match result {
+        Ok(event) => event
+        Err(_) => abort("bad event")
+      }
+    }
   @test.assert_eq(engine.deliver("missing", event).status, Skipped)
   @test.assert_eq(engine.deliver("orders", event).status, Skipped)
 }

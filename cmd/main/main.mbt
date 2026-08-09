@@ -36,13 +36,8 @@ fn run_demo() -> Unit {
   }
 
   let signature = @MoonHook.sign_hmac_sha256(hook.secret, event.payload)
-  let mock = @MoonHook.MockTransport::new([
-    @MoonHook.DeliveryResult::success(6),
-  ])
-  let engine = @MoonHook.DeliveryEngine::new(
-    registry,
-    mock.as_transport(),
-  )
+  let mock = @MoonHook.MockTransport::new([@MoonHook.DeliveryResult::success(6)])
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
   let outcome = engine.deliver("orders", event)
   println("event: \{event.id} (\{event.event_type})")
   println("signature: \{signature}")
@@ -66,8 +61,7 @@ fn main {
       match (arg_at(args, 2), arg_at(args, 3), arg_at(args, 4)) {
         (Some(secret), Some(payload), Some(signature)) =>
           println(
-            @MoonHook.verify_hmac_sha256(secret, payload, signature)
-              .to_string(),
+            @MoonHook.verify_hmac_sha256(secret, payload, signature).to_string(),
           )
         _ => print_usage()
       }

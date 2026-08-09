@@ -5,9 +5,7 @@ test "idempotency key is accepted once then rejected inside TTL" {
   @test.assert_eq(store.check_and_mark("key-1", "evt-2", 2000, 10_000), false)
   @test.assert_eq(store.length(), 1)
   let record = store.get("key-1")
-  guard record is Some(record) else {
-    fail("expected record")
-  }
+  guard record is Some(record) else { fail("expected record") }
   @test.assert_eq(record.event_id, "evt-1")
   @test.assert_eq(record.expires_at_ms, 11_000)
 }
@@ -18,7 +16,10 @@ test "expired idempotency key can be reused" {
   @test.assert_eq(store.check_and_mark("key-2", "evt-1", 1000, 100), true)
   @test.assert_eq(store.check_and_mark("key-2", "evt-1", 1100, 100), false)
   @test.assert_eq(store.check_and_mark("key-2", "evt-3", 1101, 100), true)
-  @test.assert_eq(store.get("key-2").map(record => record.event_id), Some("evt-3"))
+  @test.assert_eq(
+    store.get("key-2").map(record => record.event_id),
+    Some("evt-3"),
+  )
 }
 
 ///|

@@ -13,9 +13,7 @@ test "registry rejects duplicates" {
   let registry = @MoonHook.HookRegistry::new()
   let hook = @MoonHook.Hook::new("orders", "https://example.com/hooks/orders")
   registry.register(hook) |> ignore
-  guard registry.register(hook) is Err(message) else {
-    fail("expected Err")
-  }
+  guard registry.register(hook) is Err(message) else { fail("expected Err") }
   @test.assert_eq(message, "hook already registered: orders")
 }
 
@@ -23,9 +21,7 @@ test "registry rejects duplicates" {
 test "registry rejects invalid hooks" {
   let registry = @MoonHook.HookRegistry::new()
   let hook = @MoonHook.Hook::new("", "https://example.com")
-  guard registry.register(hook) is Err(message) else {
-    fail("expected Err")
-  }
+  guard registry.register(hook) is Err(message) else { fail("expected Err") }
   @test.assert_eq(message, "hook id is required")
   @test.assert_eq(registry.count(), 0)
 }

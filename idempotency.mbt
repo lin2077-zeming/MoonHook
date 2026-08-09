@@ -33,19 +33,21 @@ pub fn IdempotencyStore::check_and_mark(
   match self.records.get(key) {
     Some(record) =>
       if record.expires_at_ms < now_ms {
-        self.records.set(
-          key,
-          { event_id, first_seen_ms: now_ms, expires_at_ms: expires_at },
-        )
+        self.records.set(key, {
+          event_id,
+          first_seen_ms: now_ms,
+          expires_at_ms: expires_at,
+        })
         true
       } else {
         false
       }
     None => {
-      self.records.set(
-        key,
-        { event_id, first_seen_ms: now_ms, expires_at_ms: expires_at },
-      )
+      self.records.set(key, {
+        event_id,
+        first_seen_ms: now_ms,
+        expires_at_ms: expires_at,
+      })
       true
     }
   }

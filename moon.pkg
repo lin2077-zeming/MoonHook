@@ -2,7 +2,7 @@ import {
   "moonbitlang/core/array",
   "moonbitlang/core/builtin",
   "moonbitlang/core/debug",
-  "moonbitlang/core/encoding/utf8" @utf8,
+  "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/hashmap" @map,
   "moonbitlang/core/math",
   "moonbitlang/core/ref",

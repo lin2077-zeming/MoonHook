@@ -42,11 +42,7 @@ pub fn Hook::with_secret(self : Hook, secret : String) -> Hook {
 }
 
 ///|
-pub fn Hook::with_header(
-  self : Hook,
-  name : String,
-  value : String,
-) -> Hook {
+pub fn Hook::with_header(self : Hook, name : String, value : String) -> Hook {
   let headers = self.headers.copy()
   headers.push((name, value))
   {

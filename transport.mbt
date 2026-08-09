@@ -10,13 +10,7 @@ pub(all) struct DeliveryResult {
 
 ///|
 pub fn DeliveryResult::success(duration_ms : Int) -> DeliveryResult {
-  {
-    ok: true,
-    retryable: false,
-    status_code: 200,
-    error: "",
-    duration_ms,
-  }
+  { ok: true, retryable: false, status_code: 200, error: "", duration_ms }
 }
 
 ///|

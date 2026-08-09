@@ -29,7 +29,11 @@ pub fn RetryPolicy::next_delay_ms(self : RetryPolicy, attempt : Int) -> Int {
         } else {
           raw.to_int()
         }
-        if capped < 0 { 0 } else { capped }
+        if capped < 0 {
+          0
+        } else {
+          capped
+        }
       }
   }
 }
