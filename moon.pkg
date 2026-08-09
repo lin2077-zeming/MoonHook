@@ -1,4 +1,6 @@
 import {
+  "moonbitlang/core/array",
+  "moonbitlang/core/debug",
   "moonbitlang/core/math",
 }
 

@@ -9,7 +9,7 @@ pub(all) enum RetryPolicy {
   None
   Fixed(Int)
   Exponential(Int, Double, Int)
-} derive(Eq)
+} derive(Eq, @debug.Debug)
 
 ///|
 /// Returns the delay before retry `attempt`, where attempt starts at 1 for the
