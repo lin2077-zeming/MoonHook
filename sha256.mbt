@@ -138,12 +138,16 @@ fn byte_to_hex(byte : Byte) -> String {
 }
 
 ///|
-/// Computes the lowercase hex SHA-256 digest of `data`.
-pub fn sha256_hex(data : Bytes) -> String {
-  let digest = sha256(data)
+pub fn bytes_to_hex(bytes : Array[Byte]) -> String {
   let mut out = ""
-  for byte in digest {
+  for byte in bytes {
     out = out + byte_to_hex(byte)
   }
   out
+}
+
+///|
+/// Computes the lowercase hex SHA-256 digest of `data`.
+pub fn sha256_hex(data : Bytes) -> String {
+  bytes_to_hex(sha256(data))
 }
