@@ -7,7 +7,7 @@ pub(all) struct WebhookEvent {
   payload : String
   timestamp_ms : Int
   idempotency_key : String
-} derive(Eq)
+} derive(Eq, @debug.Debug)
 
 ///|
 /// Constructs a `WebhookEvent` directly. Prefer `EventBuilder` for validation.
@@ -31,7 +31,7 @@ pub(all) struct EventBuilder {
   payload : String
   timestamp_ms : Int
   idempotency_key : String
-} derive(Eq)
+} derive(Eq, @debug.Debug)
 
 ///|
 pub fn EventBuilder::new() -> EventBuilder {
