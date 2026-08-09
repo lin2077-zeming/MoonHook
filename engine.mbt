@@ -8,6 +8,16 @@ pub(all) enum DeliveryStatus {
 } derive(Eq, @debug.Debug)
 
 ///|
+pub fn DeliveryStatus::describe(self : DeliveryStatus) -> String {
+  match self {
+    Success => "success"
+    Retry => "retry"
+    DeadLetter => "dead_letter"
+    Skipped => "skipped"
+  }
+}
+
+///|
 /// A single recorded attempt inside a delivery.
 pub(all) struct DeliveryAttempt {
   attempt : Int

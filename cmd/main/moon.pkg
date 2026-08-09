@@ -1,6 +1,7 @@
-// import {
-//   "lin2077-zeming/MoonHook" @lib,
-// }
+import {
+  "lin2077-zeming/MoonHook" @MoonHook,
+  "moonbitlang/core/env",
+}
 
 options(
   "is-main": true,
