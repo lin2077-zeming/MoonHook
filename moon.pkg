@@ -4,8 +4,10 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/hashmap" @map,
+  "moonbitlang/core/json",
   "moonbitlang/core/math",
   "moonbitlang/core/ref",
+  "moonbitlang/core/string",
   "moonbitlang/core/uint",
 }
 

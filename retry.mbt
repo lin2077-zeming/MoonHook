@@ -17,7 +17,16 @@ pub(all) enum RetryPolicy {
 pub fn RetryPolicy::next_delay_ms(self : RetryPolicy, attempt : Int) -> Int {
   match self {
     None => 0
-    Fixed(delay_ms) => if attempt > 0 { delay_ms } else { 0 }
+    Fixed(delay_ms) =>
+      if attempt > 0 {
+        if delay_ms < 0 {
+          0
+        } else {
+          delay_ms
+        }
+      } else {
+        0
+      }
     Exponential(initial_ms, multiplier, max_ms) =>
       if attempt <= 0 {
         0
@@ -34,6 +43,30 @@ pub fn RetryPolicy::next_delay_ms(self : RetryPolicy, attempt : Int) -> Int {
         } else {
           capped
         }
+      }
+  }
+}
+
+///|
+/// Validates the policy parameters used by a Hook.
+pub fn RetryPolicy::validate(self : RetryPolicy) -> Result[Unit, String] {
+  match self {
+    None => Ok(())
+    Fixed(delay_ms) =>
+      if delay_ms < 0 {
+        Err("retry delay must be non-negative")
+      } else {
+        Ok(())
+      }
+    Exponential(initial_ms, multiplier, max_ms) =>
+      if initial_ms <= 0 {
+        Err("initial retry delay must be positive")
+      } else if multiplier < 1.0 {
+        Err("retry multiplier must be at least 1")
+      } else if max_ms < initial_ms {
+        Err("max retry delay must be at least the initial delay")
+      } else {
+        Ok(())
       }
   }
 }

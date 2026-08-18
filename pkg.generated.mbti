@@ -8,11 +8,65 @@ import {
 }
 
 // Values
+pub const HEADER_CONTENT_TYPE : String = "Content-Type"
+
+pub const HEADER_EVENT_ID : String = "X-MoonHook-Event-Id"
+
+pub const HEADER_EVENT_TYPE : String = "X-MoonHook-Event-Type"
+
+pub const HEADER_IDEMPOTENCY_KEY : String = "X-MoonHook-Idempotency-Key"
+
+pub const HEADER_SIGNATURE : String = "X-MoonHook-Signature"
+
+pub const HEADER_SUBJECT : String = "X-MoonHook-Subject"
+
+pub const HEADER_TIMESTAMP : String = "X-MoonHook-Timestamp"
+
+pub fn build_signed_request(Hook, WebhookEvent) -> SignedRequest
+
 pub fn bytes_to_hex(Array[Byte]) -> String
 
 pub fn constant_time_eq(String, String) -> Bool
 
+pub fn dead_letter_from_json(Json) -> Result[DeadLetterEntry, String]
+
+pub fn dead_letter_from_json_string(String) -> Result[DeadLetterEntry, String]
+
+pub fn dead_letter_to_json(DeadLetterEntry) -> Json
+
+pub fn dead_letter_to_json_string(DeadLetterEntry) -> String
+
+pub fn event_from_json(Json) -> Result[WebhookEvent, String]
+
+pub fn event_from_json_string(String) -> Result[WebhookEvent, String]
+
+pub fn event_to_json(WebhookEvent) -> Json
+
+pub fn event_to_json_string(WebhookEvent) -> String
+
+pub fn find_header(Array[(String, String)], String) -> String?
+
 pub fn hmac_sha256(Bytes, Bytes) -> Array[Byte]
+
+pub fn hook_from_json(Json) -> Result[Hook, String]
+
+pub fn hook_from_json_string(String) -> Result[Hook, String]
+
+pub fn hook_to_json(Hook) -> Json
+
+pub fn hook_to_json_string(Hook) -> String
+
+pub fn pending_delivery_from_json(Json) -> Result[PendingDelivery, String]
+
+pub fn pending_delivery_from_json_string(String) -> Result[PendingDelivery, String]
+
+pub fn pending_delivery_to_json(PendingDelivery) -> Json
+
+pub fn pending_delivery_to_json_string(PendingDelivery) -> String
+
+pub fn retry_policy_from_json(Json) -> Result[RetryPolicy, String]
+
+pub fn retry_policy_to_json(RetryPolicy) -> Json
 
 pub fn sha256(Bytes) -> Array[Byte]
 
@@ -20,7 +74,19 @@ pub fn sha256_hex(Bytes) -> String
 
 pub fn sign_hmac_sha256(String, String) -> String
 
+pub fn sign_webhook(String, Int, String) -> String
+
 pub fn verify_hmac_sha256(String, String, String) -> Bool
+
+pub fn verify_signature_header(String, String, String) -> Bool
+
+pub fn verify_signed_request(String, SignedRequest) -> Bool
+
+pub fn verify_webhook(String, Int, String, String, Int, Int) -> Bool
+
+pub fn verify_webhook_request(String, Array[(String, String)], String) -> Bool
+
+pub fn verify_webhook_request_with_timestamp(String, Array[(String, String)], String, Int, Int) -> Bool
 
 // Errors
 
@@ -180,6 +246,27 @@ pub fn MockTransport::as_transport(Self) -> (Hook, WebhookEvent) -> DeliveryResu
 pub fn MockTransport::new(Array[DeliveryResult]) -> Self
 pub fn MockTransport::send(Self, Hook, WebhookEvent) -> DeliveryResult
 
+pub struct MoonHook {
+  registry : HookRegistry
+  outbox : InMemoryOutbox
+  dead_letter : InMemoryDeadLetter
+  idempotency : IdempotencyStore
+  audit : AuditLog
+  engine : DeliveryEngine
+  idempotency_ttl_ms : Int
+}
+pub fn MoonHook::audit_entries(Self) -> Array[AuditEntry]
+pub fn MoonHook::dead_letter_length(Self) -> Int
+pub fn MoonHook::dead_letters(Self) -> Array[DeadLetterEntry]
+pub fn MoonHook::deliver_now(Self, String, WebhookEvent, Int) -> DeliveryOutcome
+pub fn MoonHook::drain(Self, Int) -> Int
+pub fn MoonHook::enqueue(Self, String, WebhookEvent, Int) -> Result[Unit, String]
+pub fn MoonHook::hook_count(Self) -> Int
+pub fn MoonHook::new((Hook, WebhookEvent) -> DeliveryResult) -> Self
+pub fn MoonHook::outbox_length(Self) -> Int
+pub fn MoonHook::register(Self, Hook) -> Result[Unit, String]
+pub fn MoonHook::with_idempotency_ttl_ms(Self, Int) -> Self
+
 pub(all) struct PendingDelivery {
   hook_id : String
   event : WebhookEvent
@@ -195,6 +282,15 @@ pub(all) enum RetryPolicy {
 pub fn RetryPolicy::describe(Self) -> String
 pub fn RetryPolicy::next_delay_ms(Self, Int) -> Int
 pub fn RetryPolicy::should_retry(Self, Int, Int) -> Bool
+pub fn RetryPolicy::validate(Self) -> Result[Unit, String]
+
+pub(all) struct SignedRequest {
+  http_method : String
+  url : String
+  headers : Array[(String, String)]
+  body : String
+  signature : String
+} derive(Eq, @debug.Debug)
 
 pub(all) struct WebhookEvent {
   id : String

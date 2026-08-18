@@ -4,7 +4,7 @@
 
 项目名称：MoonHook：轻量级 WebHook 投递框架
 
-参赛者：lin2077-zeming
+参赛者：林泽明
 
 联系方式：438051102@qq.com
 
@@ -65,13 +65,3 @@ native、wasm-gc、js 等目标上复用。
 - 以内存 Outbox / 死信作为默认实现，存储层可替换为文件或 SQLite；
 - 允许合理使用 AI 辅助代码生成、测试补全与文档撰写，最终由参赛者负责代码质量、
   功能边界与开源合规。
-
-## 验收计划
-
-- 有效 MoonBit 代码与单元测试，`moon test` 可运行；
-- README 说明项目用途、主要功能与使用方法；
-- GitHub Actions CI 执行 `moon check` 与 `moon test`；
-- 演示 CLI `moon run cmd/main -- demo` 可直接运行；
-- GitHub 仓库保持 10-20 个有效提交，提交按功能模块拆分；
-- `moon publish --dry-run` 通过，最终发布至 mooncakes.io；
-- Gitlink 仓库与 GitHub 保持同步。

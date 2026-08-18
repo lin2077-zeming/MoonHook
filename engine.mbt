@@ -1,5 +1,8 @@
 ///|
 /// Final state of a delivery after all attempts.
+///
+/// `Retry` is reserved for scheduler-driven delivery; the synchronous
+/// `DeliveryEngine::deliver` reports `Success`, `DeadLetter`, or `Skipped`.
 pub(all) enum DeliveryStatus {
   Success
   Retry
@@ -53,7 +56,8 @@ pub fn DeliveryEngine::new(
 
 ///|
 /// Delivers synchronously. Retry delays are exposed through `RetryPolicy` for
-/// external schedulers; this engine performs the attempts back to back.
+/// external schedulers; this engine performs the attempts back to back and
+/// honors `RetryPolicy::should_retry` before starting another attempt.
 pub fn DeliveryEngine::deliver(
   self : DeliveryEngine,
   hook_id : String,
@@ -80,16 +84,13 @@ pub fn DeliveryEngine::deliver(
           if result.ok {
             final_status = Success
             break
-          } else if !result.retryable {
-            final_status = DeadLetter
-            break
-          } else if attempt_number == max_attempts {
+          } else if !result.retryable ||
+            !hook.retry_policy.should_retry(attempt_number, max_attempts) {
             final_status = DeadLetter
             break
           } else {
-            final_status = Retry
+            attempt_number = attempt_number + 1
           }
-          attempt_number = attempt_number + 1
         }
         { hook_id, event_id: event.id, status: final_status, attempts }
       }

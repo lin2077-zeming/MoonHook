@@ -127,3 +127,30 @@ test "missing and inactive hooks are skipped" {
   @test.assert_eq(engine.deliver("missing", event).status, Skipped)
   @test.assert_eq(engine.deliver("orders", event).status, Skipped)
 }
+
+///|
+test "none policy does not retry retryable failures" {
+  let registry = @MoonHook.HookRegistry::new()
+  let hook = @MoonHook.Hook::new("orders", "https://example.com/hooks/orders")
+    .with_retry_policy(None)
+    .with_max_attempts(3)
+  registry.register(hook) |> ignore
+  let mock = @MoonHook.MockTransport::new([
+    @MoonHook.DeliveryResult::failure(500, "boom", 10, true),
+    @MoonHook.DeliveryResult::success(5),
+  ])
+  let engine = @MoonHook.DeliveryEngine::new(registry, mock.as_transport())
+  let event = @MoonHook.EventBuilder::new()
+    .with_id("evt-none")
+    .with_event_type("order.created")
+    .build()
+    |> result => {
+      match result {
+        Ok(event) => event
+        Err(_) => abort("bad event")
+      }
+    }
+  let outcome = engine.deliver("orders", event)
+  @test.assert_eq(outcome.status, DeadLetter)
+  @test.assert_eq(outcome.attempts.length(), 1)
+}

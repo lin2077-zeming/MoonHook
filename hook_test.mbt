@@ -48,3 +48,28 @@ test "hook validation" {
   let valid = @MoonHook.Hook::new("orders", "https://example.com")
   @test.assert_eq(valid.validate(), Ok(()))
 }
+
+///|
+test "hook validation rejects invalid retry policy" {
+  let bad = @MoonHook.Hook::new("orders", "https://example.com").with_retry_policy(
+    Fixed(-1),
+  )
+  guard bad.validate() is Err(message) else { fail("expected Err") }
+  @test.assert_eq(message, "retry delay must be non-negative")
+
+  let bad_exp = @MoonHook.Hook::new("orders", "https://example.com").with_retry_policy(
+    Exponential(100, 0.5, 1000),
+  )
+  guard bad_exp.validate() is Err(message) else { fail("expected Err") }
+  @test.assert_eq(message, "retry multiplier must be at least 1")
+}
+
+///|
+test "header lookup is case insensitive" {
+  let hook = @MoonHook.Hook::new("orders", "https://example.com/hooks/orders")
+    .with_header("X-Team", "payments")
+    .with_header("content-type", "application/json")
+  @test.assert_eq(hook.header_value("x-team"), Some("payments"))
+  @test.assert_eq(hook.header_value("Content-Type"), Some("application/json"))
+  @test.assert_eq(hook.header_value("X-Missing"), None)
+}

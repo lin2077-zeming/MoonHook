@@ -123,17 +123,20 @@ pub fn Hook::validate(self : Hook) -> Result[Unit, String] {
     Err("max attempts must be at least 1")
   } else if self.timeout_ms <= 0 {
     Err("timeout must be positive")
+  } else if self.retry_policy.validate() is Err(message) {
+    Err(message)
   } else {
     Ok(())
   }
 }
 
 ///|
-/// Looks up a header value by name, returning the last match.
+/// Looks up a header value by name, returning the last match. Header names are
+/// matched case-insensitively, following HTTP semantics.
 pub fn Hook::header_value(self : Hook, name : String) -> String? {
   let mut found : String? = None
   for item in self.headers {
-    if item.0 == name {
+    if header_name_matches(item.0, name) {
       found = Some(item.1)
     }
   }

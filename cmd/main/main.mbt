@@ -13,7 +13,35 @@ fn print_usage() -> Unit {
   println("  moon run cmd/main -- demo")
   println("  moon run cmd/main -- sign <secret> <payload>")
   println("  moon run cmd/main -- verify <secret> <payload> <signature>")
+  println("  moon run cmd/main -- request <hook-id> <url> <secret> <payload>")
   println("  moon run cmd/main -- help")
+}
+
+///|
+fn run_request(
+  hook_id : String,
+  url : String,
+  secret : String,
+  payload : String,
+) -> Unit {
+  let hook = @MoonHook.Hook::new(hook_id, url).with_secret(secret)
+  let event_result = @MoonHook.EventBuilder::new()
+    .with_id("evt-cli")
+    .with_event_type("cli.request")
+    .with_payload(payload)
+    .build()
+  let event = match event_result {
+    Ok(event) => event
+    Err(message) => abort(message)
+  }
+  let request = @MoonHook.build_signed_request(hook, event)
+  println("method: \{request.http_method}")
+  println("url: \{request.url}")
+  for item in request.headers {
+    println("\{item.0}: \{item.1}")
+  }
+  println("body: \{request.body}")
+  println("signature: \{request.signature}")
 }
 
 ///|
@@ -63,6 +91,13 @@ fn main {
           println(
             @MoonHook.verify_hmac_sha256(secret, payload, signature).to_string(),
           )
+        _ => print_usage()
+      }
+    "request" =>
+      match
+        (arg_at(args, 2), arg_at(args, 3), arg_at(args, 4), arg_at(args, 5)) {
+        (Some(hook_id), Some(url), Some(secret), Some(payload)) =>
+          run_request(hook_id, url, secret, payload)
         _ => print_usage()
       }
     "help" => print_usage()
