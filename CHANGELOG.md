@@ -2,6 +2,14 @@
 
 All notable changes to MoonHook are documented in this file.
 
+## [0.3.1] - 2026-09-11
+
+### Added
+
+- README for the `transport_http` package, so the mooncakes.io package page
+  documents the sender, receiver, retry semantics and the `e2e` demo instead of
+  reporting a missing README.
+
 ## [0.3.0] - 2026-09-07
 
 ### Added
