@@ -6,6 +6,10 @@
 注册、HMAC-SHA256 签名与验签、时间戳防重放、重试策略、投递引擎、Outbox、
 死信队列、幂等去重和审计日志，全部为纯 MoonBit 实现，不依赖 FFI。
 
+在此之上，`transport_http` 包基于 `moonbitlang/async` 提供**真实 HTTP 投递**：
+签名请求会真正 POST 到接收端，重试会按退避策略真实等待，接收端可以直接用
+`webhook_receiver` 挂到 `@http.Server` 上完成验签。
+
 ## 核心功能
 
 - `WebhookEvent` / `Hook` 数据模型与校验式 Builder
@@ -20,20 +24,90 @@
 - `IdempotencyStore`：TTL 幂等去重与过期清理
 - `AuditLog`：投递尝试审计与最近记录查询
 - Hook / 待投递 / 死信 JSON 序列化与反序列化
-- 演示 CLI：完整流水线、签名、验签、请求构建
+- `transport_http`：基于 `moonbitlang/async/http` 的真实 HTTP 投递
+  （`post_signed_request`、`http_transport`）
+- `AsyncDeliveryEngine`：异步投递引擎，按 `RetryPolicy::next_delay_ms`
+  在两次尝试之间真正 sleep，而不是背靠背重试
+- `webhook_receiver`：接收端处理器，读 body、验签、校验时间戳窗口并回 200/401
+- 演示 CLI：内存流水线、签名、验签、请求构建，以及 HTTP 收发演示
 
 ## 快速开始
 
 ```bash
-moon test
-moon run cmd/main -- demo
+moon test                          # 核心测试 + HTTP 集成测试
+moon run cmd/main -- demo          # 内存流水线演示
 moon run cmd/main -- sign <secret> <payload>
 moon run cmd/main -- verify <secret> <payload> <signature>
 moon run cmd/main -- request <hook-id> <url> <secret> <payload>
+
+moon run cmd/httpdemo -- e2e       # 起接收端 + 真实投递 + 验签，一条命令跑通
+moon run cmd/httpdemo -- serve 127.0.0.1:8080 <secret>
+moon run cmd/httpdemo -- deliver <url> <secret> <payload>
 ```
 
 `demo` 命令会在内存中完成“注册 Hook -> 构建事件 -> 签名 -> 投递 -> 审计”
 的完整流程；`request` 命令会打印一个带签名和时间戳 header 的 HTTP 请求。
+
+`e2e` 命令在同一个进程里启动 MoonHook 接收端，再通过 HTTP 投递一个签名事件，
+并把收发两侧的结果都打印出来：
+
+```text
+[receiver] listening on http://127.0.0.1:18080/hooks/orders
+[sender]   POST http://127.0.0.1:18080/hooks/orders
+[sender]   attempt 1: HTTP 200 in 2ms
+[sender]   status: success
+[receiver] verified payloads: 1
+[receiver] payload: {"order_id": "A-1001", "total": 99}
+```
+
+## 真实 HTTP 投递
+
+发送端把 `Hook` 和 `WebhookEvent` 交给 `AsyncDeliveryEngine`，每次尝试都会通过
+`http_transport()` 真正发出请求：
+
+```moonbit nocheck
+///|
+async fn main {
+  let registry = @MoonHook.HookRegistry::new()
+  let hook = @MoonHook.Hook::new("orders", "https://example.com/hooks/orders")
+    .with_secret("shared-secret")
+    .with_retry_policy(@MoonHook.RetryPolicy::Exponential(200, 2.0, 5_000))
+    .with_max_attempts(5)
+  registry.register(hook) |> ignore
+  let engine = @transport_http.AsyncDeliveryEngine::new(
+    registry,
+    @transport_http.http_transport(),
+  )
+  let outcome = engine.deliver("orders", event)
+  println(outcome.status.describe())
+}
+```
+
+接收端把 `webhook_receiver` 直接挂到 `@http.Server` 上，验签和时间戳窗口由
+MoonHook 负责：
+
+```moonbit nocheck
+///|
+async fn main {
+  let server = @http.Server(@socket.Addr::parse("127.0.0.1:8080"))
+  server.run_forever(
+    @transport_http.webhook_receiver("shared-secret", 300_000, payload => {
+      println("verified webhook: \{payload}")
+    }),
+  )
+}
+```
+
+重试语义：2xx 视为成功；408、425、429 与 5xx 视为可重试失败；其他 4xx 直接进入
+死信；连接层错误（DNS、拒绝连接等）同样可重试。每次尝试的状态码与耗时都会记录
+在 `DeliveryOutcome::attempts` 中。
+
+### 目标平台
+
+- 核心包（事件、签名、重试、引擎、存储）保持平台无关，CI 额外验证 `wasm-gc`
+  与 `js`，`DeliveryEngine` 在这些目标上照常可用。
+- `transport_http` 依赖 `moonbitlang/async` 的原生 IO，因此声明
+  `supported_targets = "+native"`，只在 native 目标上参与构建。
 
 ## 收发两侧验签
 
@@ -79,7 +153,9 @@ audit.mbt         # 审计日志
 request.mbt       # 签名请求构建与接收端验签
 json_codec.mbt    # 领域模型 JSON 序列化
 coordinator.mbt   # MoonHook 高层门面
-cmd/main/         # 演示 CLI
+transport_http/   # 真实 HTTP 投递适配（native）：传输、异步引擎、接收端处理器
+cmd/main/         # 内存演示 CLI
+cmd/httpdemo/     # HTTP 收发演示 CLI（native）
 ```
 
 ## 设计说明
@@ -92,16 +168,23 @@ pub type Transport = (Hook, WebhookEvent) -> DeliveryResult
 ```
 
 `DeliveryEngine` 根据 Hook 的 `RetryPolicy` 和 `max_attempts` 决定继续重试
-还是进入死信。当前引擎是同步执行，退避延迟由 `RetryPolicy::next_delay_ms`
-提供给外部调度器。
+还是进入死信。同步引擎背靠背执行尝试，退避延迟由
+`RetryPolicy::next_delay_ms` 提供给外部调度器；需要真实网络投递时改用
+`transport_http` 中的 `AsyncDeliveryEngine`，它会等待每次 HTTP 尝试完成，并在
+两次尝试之间按同一个策略真正 sleep。
+
+接收端与发送端共用一套验签实现：`build_signed_request` 签名
+`"<timestamp_ms>.<payload>"`，`webhook_receiver` 用同一个 secret 校验签名和
+时间窗口，因此“自己发、自己收”的端到端演示和接入外部系统走的是同一条代码路径。
 
 ## Roadmap
 
-- HTTP 传输适配（`moonbitlang/async` / `mooncat`）
-- 文件或 SQLite 持久化 Outbox / 死信（JSON 序列化已就绪）
-- 定时调度器按退避策略执行重试
-- WebHook 注册与管理的 HTTP API
-- 发布到 mooncakes.io 并补充 CI 覆盖
+- [x] HTTP 传输适配与端到端示例（`transport_http`，基于 `moonbitlang/async`）
+- [ ] 文件或 SQLite 持久化 Outbox / 死信（JSON 序列化已就绪）
+- [ ] 定时调度器按退避策略执行重试（`AsyncDeliveryEngine` 已支持等待退避）
+- [ ] WebHook 注册与管理的 HTTP API
+- [ ] 连接复用（`@http.Client`）与代理支持
+- [ ] 错误类型化与覆盖率补强
 
 ## License
 

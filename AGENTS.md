@@ -15,6 +15,30 @@ You can browse and install extra skills here:
 - In the toplevel directory, there is a `moon.mod` file listing module
   metadata.
 
+## Packages and targets
+
+- Root package (`lin2077-zeming/MoonHook`): target agnostic core — event
+  model, signing, retry policy, delivery engine, stores, audit, JSON codecs and
+  the high level facade. Keep it buildable on every target.
+- `transport_http/`: native-only real HTTP delivery on top of
+  `moonbitlang/async` (`supported_targets = "+native"`); it provides
+  `http_transport`, `AsyncDeliveryEngine`, `post_signed_request` and
+  `webhook_receiver`. Its integration tests start a real local HTTP server.
+- `cmd/main/`: synchronous in-memory demo CLI. `cmd/httpdemo/`: native HTTP
+  demo CLI (`e2e`, `serve`, `deliver`).
+- `preferred_target` is `native` because interface generation follows the
+  canonical target and the HTTP adapter is native-only. The core must still
+  pass `moon check --target wasm-gc` and `moon check --target js`.
+
+## Verification
+
+```bash
+moon fmt --check
+moon check && moon test                    # native: core + HTTP integration tests
+moon check --target wasm-gc && moon test --target wasm-gc
+moon run cmd/httpdemo -- e2e               # real HTTP round trip with verification
+```
+
 ## Coding convention
 
 - MoonBit code is organized in block style, each block is separated by `///|`,
