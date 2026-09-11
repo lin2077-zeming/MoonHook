@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "lin2077-zeming/MoonHook/transport_http"
+
+import {
+  "lin2077-zeming/MoonHook",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+}
+
+// Values
+pub fn http_transport() -> async (@MoonHook.Hook, @MoonHook.WebhookEvent) -> @MoonHook.DeliveryResult
+
+pub async fn post_signed_request(@MoonHook.SignedRequest) -> @MoonHook.DeliveryResult
+
+pub fn webhook_receiver(String, Int, (String) -> Unit) -> async (@http.Request, &@io.Reader, @http.ServerConnection) -> Unit
+
+// Errors
+
+// Types and methods
+pub struct AsyncDeliveryEngine {
+  registry : @MoonHook.HookRegistry
+  transport : async (@MoonHook.Hook, @MoonHook.WebhookEvent) -> @MoonHook.DeliveryResult
+}
+pub async fn AsyncDeliveryEngine::deliver(Self, String, @MoonHook.WebhookEvent) -> @MoonHook.DeliveryOutcome
+pub fn AsyncDeliveryEngine::new(@MoonHook.HookRegistry, async (@MoonHook.Hook, @MoonHook.WebhookEvent) -> @MoonHook.DeliveryResult) -> Self
+
+// Type aliases
+pub type AsyncTransport = async (@MoonHook.Hook, @MoonHook.WebhookEvent) -> @MoonHook.DeliveryResult
+
+// Traits

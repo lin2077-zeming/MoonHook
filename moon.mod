@@ -11,7 +11,7 @@
 
 name = "lin2077-zeming/MoonHook"
 
-version = "0.2.0"
+version = "0.3.0"
 
 readme = "README.mbt.md"
 
@@ -22,6 +22,7 @@ license = "Apache-2.0"
 keywords = [
   "webhook",
   "delivery",
+  "http",
   "hmac",
   "retry",
   "outbox",
@@ -30,6 +31,13 @@ keywords = [
   "moonbit",
 ]
 
-preferred_target = "wasm-gc"
+// The core package stays target agnostic and is checked on wasm-gc and js in
+// CI, but `transport_http` needs `moonbitlang/async` and therefore native IO.
 
-description = "Lightweight webhook delivery framework for MoonBit with signing, retry, outbox, dead letter, idempotency, and audit."
+preferred_target = "native"
+
+description = "Lightweight webhook delivery framework for MoonBit with signing, retry, outbox, dead letter, idempotency, audit, and real HTTP delivery over moonbitlang/async."
+
+import {
+  "moonbitlang/async@0.21.3",
+}

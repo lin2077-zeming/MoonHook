@@ -1,0 +1,13 @@
+import {
+  "lin2077-zeming/MoonHook",
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/core/env",
+}
+
+import {
+  "moonbitlang/async/socket",
+} for "wbtest"
+
+supported_targets = "+native"

@@ -148,6 +148,7 @@ pub(all) struct DeliveryResult {
 } derive(Eq, @debug.Debug)
 pub fn DeliveryResult::failure(Int, String, Int, Bool) -> Self
 pub fn DeliveryResult::success(Int) -> Self
+pub fn DeliveryResult::success_with_status(Int, Int) -> Self
 
 pub(all) enum DeliveryStatus {
   Success
@@ -306,4 +307,3 @@ pub fn WebhookEvent::new(String, String, String, String, Int, String) -> Self
 pub type Transport = (Hook, WebhookEvent) -> DeliveryResult
 
 // Traits
-

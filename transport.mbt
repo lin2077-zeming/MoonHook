@@ -10,7 +10,17 @@ pub(all) struct DeliveryResult {
 
 ///|
 pub fn DeliveryResult::success(duration_ms : Int) -> DeliveryResult {
-  { ok: true, retryable: false, status_code: 200, error: "", duration_ms }
+  { ok: true, retryable: false, status_code: 200, error: "", duration_ms, }
+}
+
+///|
+/// A successful attempt that records the status code reported by the receiver,
+/// so transports can distinguish `200` from `202` or `204`.
+pub fn DeliveryResult::success_with_status(
+  status_code : Int,
+  duration_ms : Int,
+) -> DeliveryResult {
+  { ok: true, retryable: false, status_code, error: "", duration_ms, }
 }
 
 ///|
@@ -20,7 +30,7 @@ pub fn DeliveryResult::failure(
   duration_ms : Int,
   retryable : Bool,
 ) -> DeliveryResult {
-  { ok: false, retryable, status_code, error, duration_ms }
+  { ok: false, retryable, status_code, error, duration_ms, }
 }
 
 ///|
@@ -38,7 +48,7 @@ pub struct MockTransport {
 
 ///|
 pub fn MockTransport::new(results : Array[DeliveryResult]) -> MockTransport {
-  { results, next: @ref.new(0) }
+  { results, next: @ref.new(0), }
 }
 
 ///|
