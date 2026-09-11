@@ -15,11 +15,27 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
+      # `moonbitlang/async` links OpenSSL for its TLS support.
+      - name: Install OpenSSL headers
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev
+
       - name: moon fmt --check
         run: moon fmt --check
 
-      - name: moon check
+      # Native is the default target: it covers the core package and the
+      # HTTP integration tests (transport_http, cmd/httpdemo).
+      - name: moon check (native)
         run: moon check
 
-      - name: moon test
+      - name: moon test (native)
         run: moon test
+
+      # The core package stays target agnostic; keep wasm-gc and js green.
+      - name: moon check (wasm-gc)
+        run: moon check --target wasm-gc
+
+      - name: moon test (wasm-gc)
+        run: moon test --target wasm-gc
+
+      - name: moon check (js)
+        run: moon check --target js
