@@ -19,7 +19,7 @@ pub fn WebhookEvent::new(
   timestamp_ms : Int,
   idempotency_key : String,
 ) -> WebhookEvent {
-  { id, event_type, subject, payload, timestamp_ms, idempotency_key }
+  { id, event_type, subject, payload, timestamp_ms, idempotency_key, }
 }
 
 ///|

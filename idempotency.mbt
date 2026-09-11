@@ -15,7 +15,7 @@ pub struct IdempotencyStore {
 
 ///|
 pub fn IdempotencyStore::new() -> IdempotencyStore {
-  { records: @map.HashMap([]) }
+  { records: @map.HashMap([]), }
 }
 
 ///|

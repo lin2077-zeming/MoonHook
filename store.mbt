@@ -26,7 +26,7 @@ pub struct InMemoryOutbox {
 
 ///|
 pub fn InMemoryOutbox::new() -> InMemoryOutbox {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
@@ -36,7 +36,7 @@ pub fn InMemoryOutbox::enqueue(
   event : WebhookEvent,
   now_ms : Int,
 ) -> Unit {
-  self.entries.push({ hook_id, event, queued_at_ms: now_ms, attempts_used: 0 })
+  self.entries.push({ hook_id, event, queued_at_ms: now_ms, attempts_used: 0, })
 }
 
 ///|
@@ -68,7 +68,7 @@ pub struct InMemoryDeadLetter {
 
 ///|
 pub fn InMemoryDeadLetter::new() -> InMemoryDeadLetter {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|

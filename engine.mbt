@@ -51,7 +51,7 @@ pub fn DeliveryEngine::new(
   registry : HookRegistry,
   transport : Transport,
 ) -> DeliveryEngine {
-  { registry, transport }
+  { registry, transport, }
 }
 
 ///|
@@ -65,10 +65,10 @@ pub fn DeliveryEngine::deliver(
 ) -> DeliveryOutcome {
   let attempts : Array[DeliveryAttempt] = []
   match self.registry.get(hook_id) {
-    None => { hook_id, event_id: event.id, status: Skipped, attempts }
+    None => { hook_id, event_id: event.id, status: Skipped, attempts, }
     Some(hook) =>
       if !hook.active {
-        { hook_id, event_id: event.id, status: Skipped, attempts }
+        { hook_id, event_id: event.id, status: Skipped, attempts, }
       } else {
         let max_attempts = hook.max_attempts
         let mut attempt_number = 1
@@ -92,7 +92,7 @@ pub fn DeliveryEngine::deliver(
             attempt_number = attempt_number + 1
           }
         }
-        { hook_id, event_id: event.id, status: final_status, attempts }
+        { hook_id, event_id: event.id, status: final_status, attempts, }
       }
   }
 }

@@ -18,7 +18,7 @@ pub struct AuditLog {
 
 ///|
 pub fn AuditLog::new() -> AuditLog {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|

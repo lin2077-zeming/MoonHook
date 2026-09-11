@@ -276,7 +276,8 @@ pub fn pending_delivery_from_json(
           match map.get("event") {
             Some(event_json) =>
               match event_from_json(event_json) {
-                Ok(event) => Ok({ hook_id, event, queued_at_ms, attempts_used })
+                Ok(event) =>
+                  Ok({ hook_id, event, queued_at_ms, attempts_used, })
                 Err(_) => Err("invalid pending delivery json")
               }
             None => Err("invalid pending delivery json")
@@ -328,7 +329,7 @@ pub fn dead_letter_from_json(json : Json) -> Result[DeadLetterEntry, String] {
             Some(event_json) =>
               match event_from_json(event_json) {
                 Ok(event) =>
-                  Ok({ hook_id, event, reason, failed_at_ms, attempts })
+                  Ok({ hook_id, event, reason, failed_at_ms, attempts, })
                 Err(_) => Err("invalid dead letter json")
               }
             None => Err("invalid dead letter json")

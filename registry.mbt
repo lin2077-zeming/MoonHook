@@ -6,7 +6,7 @@ pub struct HookRegistry {
 
 ///|
 pub fn HookRegistry::new() -> HookRegistry {
-  { hooks: @map.HashMap([]) }
+  { hooks: @map.HashMap([]), }
 }
 
 ///|
