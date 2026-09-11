@@ -19,6 +19,14 @@ jobs:
       - name: Install OpenSSL headers
         run: sudo apt-get update && sudo apt-get install -y libssl-dev
 
+      - name: moon version
+        run: moon version --all
+
+      # A fresh runner has an empty registry index, so dependencies such as
+      # `moonbitlang/async` cannot be resolved before the first update.
+      - name: moon update
+        run: moon update
+
       - name: moon fmt --check
         run: moon fmt --check
 
