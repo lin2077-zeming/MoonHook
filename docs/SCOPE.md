@@ -10,6 +10,8 @@ MoonHook 是一个 **WebHook 投递（出站 / egress）框架**：把事件可�
 - 出站投递链路：事件建模 → 签名 → 投递 → 重试 → 死信 → 审计
 - 真实 HTTP 投递（`transport_http`，基于 `moonbitlang/async`，native 目标）
 - 收发两侧共用的签名与验签：HMAC-SHA256、时间戳防重放、常量时间比较
+- 出站平台签名适配：GitHub、Stripe、Slack、飞书自定义机器人、Shopify，
+  一键生成平台要求的签名头（`SignatureProvider`）
 - 可靠性组件：`InMemoryOutbox`、死信队列、TTL 幂等去重、审计日志、JSON 序列化
 - 接收端最小处理器 `webhook_receiver`：验签 + 时间窗校验 + `200` / `401`
 
@@ -17,7 +19,8 @@ MoonHook 是一个 **WebHook 投递（出站 / egress）框架**：把事件可�
 
 - **入站路由与中间件管线**：不做 `router` / `middleware` / 平台事件分发
 - **多平台入站载荷适配**：不解析 GitHub / GitLab / 飞书 / 企业微信 / Stripe 的
-  业务字段；载荷由调用方定义，项目只提供通用的 `WebhookEvent` 模型
+  业务字段；载荷由调用方定义，项目只提供通用的 `WebhookEvent` 模型。
+  平台适配在本项目里指**出站签名**与**验签**，不含事件语义解析
 - **不绑定运行时**：不在库内启动 HTTP 服务器或事件循环，服务器由调用方提供
   （仓库内的演示 CLI 只是为了可复现地展示投递链路）
 - **持久化后端**：当前提供内存 Outbox / 死信与 JSON 编解码，文件或 SQLite

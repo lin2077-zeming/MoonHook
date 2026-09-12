@@ -11,7 +11,7 @@
 
 name = "lin2077-zeming/MoonHook"
 
-version = "0.3.2"
+version = "0.4.0"
 
 readme = "README.mbt.md"
 

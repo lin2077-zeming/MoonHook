@@ -2,6 +2,30 @@
 
 All notable changes to MoonHook are documented in this file.
 
+## [0.4.0] - 2026-09-11
+
+### Added
+
+- `SignatureProvider`: outbound signing for the schemes providers actually use,
+  with the sender and the receiver sharing one implementation.
+  - `GitHub`: `X-Hub-Signature-256: sha256=<hex>` over the raw body.
+  - `Stripe`: `Stripe-Signature: t=<unix_s>,v1=<hex>` over `"<t>.<body>"`,
+    accepting several `v1` values so secret rotation keeps working.
+  - `Slack`: `X-Slack-Signature: v0=<hex>` plus `X-Slack-Request-Timestamp`
+    over `"v0:<t>:<body>"`.
+  - `FeishuBot`: `timestamp` / `sign` fields inside the JSON body, with
+    `sign = base64(HMAC-SHA256(key = "<t>\n<secret>", message = ""))`; the
+    signature does not cover the message body, which is documented.
+  - `Shopify`: `X-Shopify-Hmac-Sha256: <base64>` over the raw body.
+  - `sign_value`, `sign_headers`, `header_names`, `verify`, `parse` and
+    `describe`, plus `SignedRequest::with_provider_signature` to attach the
+    provider headers to an already signed request.
+  - `feishu_bot_text_body` builds a complete custom-bot message body.
+- Signature tests: GitHub's documented vector plus values cross-checked against
+  an independent HMAC-SHA256 implementation, rotation, replay window, tampering
+  and case-insensitive header cases.
+- CLI: `providers` and `sign-provider <provider> <secret> <timestamp_s> <payload>`.
+
 ## [0.3.2] - 2026-09-11
 
 ### Changed

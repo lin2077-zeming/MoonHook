@@ -18,10 +18,10 @@
 
 ```bash
 moon check --deny-warn                      # 三个目标均 0 warning
-moon test --deny-warn                       # 66 个测试
+moon test --deny-warn                       # 75 个测试
 moon check --target wasm-gc --deny-warn     # 核心包保持可移植
 moon check --target js --deny-warn
-moon test --enable-coverage                 # 覆盖率：库代码约 91%
+moon test --enable-coverage                 # 覆盖率：库代码 90% 以上（不含 CLI）
 moon coverage report -f summary
 moon run cmd/httpdemo -- e2e                # 真实 HTTP 投递 + 验签，端到端
 ```
@@ -43,12 +43,14 @@ CI 在 native / wasm-gc / js 三个目标上执行 `check` 与 `test`，并校�
 - `IdempotencyStore`：TTL 幂等去重与过期清理
 - `AuditLog`：投递尝试审计与最近记录查询
 - Hook / 待投递 / 死信 JSON 序列化与反序列化
+- `SignatureProvider`：出站平台签名适配，覆盖 GitHub、Stripe、Slack、飞书
+  自定义机器人、Shopify，收发两侧共用同一套实现
 - `transport_http`：基于 `moonbitlang/async/http` 的真实 HTTP 投递
   （`post_signed_request`、`http_transport`）
 - `AsyncDeliveryEngine`：异步投递引擎，按 `RetryPolicy::next_delay_ms`
   在两次尝试之间真正 sleep，而不是背靠背重试
 - `webhook_receiver`：接收端处理器，读 body、验签、校验时间戳窗口并回 200/401
-- 演示 CLI：内存流水线、签名、验签、请求构建，以及 HTTP 收发演示
+- 演示 CLI：内存流水线、签名、验签、请求构建、平台签名，以及 HTTP 收发演示
 
 ## 快速开始
 
@@ -127,6 +129,46 @@ async fn main {
   与 `js`，`DeliveryEngine` 在这些目标上照常可用。
 - `transport_http` 依赖 `moonbitlang/async` 的原生 IO，因此声明
   `supported_targets = "+native"`，只在 native 目标上参与构建。
+
+## 平台签名适配（出站）
+
+不同平台的 WebHook 签名方案互不兼容。`SignatureProvider` 把主流方案收敛成一套
+API：发送端用它生成请求头，接收端用同一个 API 验签。
+
+| 平台 | 方案 | 签名内容 |
+| --- | --- | --- |
+| GitHub | `X-Hub-Signature-256: sha256=<hex>` | 原始 body |
+| Stripe | `Stripe-Signature: t=<unix_s>,v1=<hex>` | `"<t>.<body>"`，支持密钥轮换时的多个 `v1` |
+| Slack | `X-Slack-Signature: v0=<hex>` + `X-Slack-Request-Timestamp` | `"v0:<t>:<body>"` |
+| 飞书自定义机器人 | body 内 `timestamp` + `sign`（base64） | `HMAC-SHA256(key = "<t>\n<secret>", message = "")` |
+| Shopify | `X-Shopify-Hmac-Sha256: <base64>` | 原始 body |
+
+```moonbit nocheck
+///|
+let provider = @MoonHook.SignatureProvider::Stripe
+// 发送端：把平台签名头追加到已签名的请求上
+
+///|
+let signed = request.with_provider_signature(provider, secret, timestamp_s)
+// 接收端：同一个 provider 负责验签，并校验时间窗
+
+///|
+let accepted = provider.verify(secret, headers, body, now_s, 300)
+```
+
+不带时间戳的方案（GitHub、Shopify）只校验签名；带时间戳的方案会额外检查
+`tolerance_s` 窗口，传负值可关闭窗口检查。飞书机器人的签名**不覆盖消息正文**：
+它证明发送方持有 secret 且时间戳新鲜，正文完整性还需要应用层校验。
+
+命令行可以直接看到结果：
+
+```bash
+moon run cmd/main -- providers
+moon run cmd/main -- sign-provider stripe whsec_test_secret 1492774577 '{"id":"evt_1"}'
+```
+
+测试向量：GitHub 使用官方文档示例（`It's a Secret to Everybody` / `Hello, World!`），
+其余平台的期望值由独立 HMAC-SHA256 实现交叉验证。
 
 ## 收发两侧验签
 
