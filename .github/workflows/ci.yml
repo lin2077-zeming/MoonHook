@@ -30,20 +30,36 @@ jobs:
       - name: moon fmt --check
         run: moon fmt --check
 
+      # Generated interfaces are committed; fail when they are stale.
+      - name: moon info is up to date
+        run: |
+          moon info
+          git diff --exit-code
+
       # Native is the default target: it covers the core package and the
       # HTTP integration tests (transport_http, cmd/httpdemo).
+      # `--deny-warn` keeps the build warning free.
       - name: moon check (native)
-        run: moon check
+        run: moon check --deny-warn
 
       - name: moon test (native)
-        run: moon test
+        run: moon test --deny-warn
 
       # The core package stays target agnostic; keep wasm-gc and js green.
       - name: moon check (wasm-gc)
-        run: moon check --target wasm-gc
+        run: moon check --target wasm-gc --deny-warn
 
       - name: moon test (wasm-gc)
-        run: moon test --target wasm-gc
+        run: moon test --target wasm-gc --deny-warn
 
       - name: moon check (js)
-        run: moon check --target js
+        run: moon check --target js --deny-warn
+
+      - name: coverage
+        run: |
+          moon test --enable-coverage
+          moon coverage report -f summary
+
+      # Delivery is the point of this library, so the demo must actually run.
+      - name: end-to-end demo smoke test
+        run: moon run cmd/httpdemo -- e2e 38123
