@@ -36,7 +36,7 @@ keywords = [
 
 preferred_target = "native"
 
-description = "Lightweight webhook delivery framework for MoonBit with signing, retry, outbox, dead letter, idempotency, audit, and real HTTP delivery over moonbitlang/async."
+description = "Outbound webhook delivery framework for MoonBit: signing, retry with backoff, outbox, dead letter, idempotency, audit, and real HTTP delivery over moonbitlang/async."
 
 import {
   "moonbitlang/async@0.21.3",

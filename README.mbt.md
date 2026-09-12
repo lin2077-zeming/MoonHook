@@ -2,13 +2,32 @@
 
 ![CI](https://github.com/lin2077-zeming/MoonHook/actions/workflows/ci.yml/badge.svg)
 
-轻量级 WebHook 投递框架，使用 MoonBit 编写。核心能力包括事件建模、Hook
-注册、HMAC-SHA256 签名与验签、时间戳防重放、重试策略、投递引擎、Outbox、
-死信队列、幂等去重和审计日志，全部为纯 MoonBit 实现，不依赖 FFI。
+**WebHook 投递（出站）框架**，使用 MoonBit 编写：把事件可靠、可验证地送到接收端，
+并记录每一次尝试。核心能力包括事件建模、Hook 注册、HMAC-SHA256 签名与验签、
+时间戳防重放、重试策略、投递引擎、Outbox、死信队列、幂等去重和审计日志。
+核心代码为纯 MoonBit 实现，不依赖 FFI，也不依赖第三方密码学库。
 
 在此之上，`transport_http` 包基于 `moonbitlang/async` 提供**真实 HTTP 投递**：
 签名请求会真正 POST 到接收端，重试会按退避策略真实等待，接收端可以直接用
 `webhook_receiver` 挂到 `@http.Server` 上完成验签。
+
+本项目专注**投递侧**：入站只提供最小验签处理器，不做路由、中间件与平台入站适配。
+功能边界、与生态中相邻项目的关系见 [docs/SCOPE.md](./docs/SCOPE.md)。
+
+## 工程验证
+
+```bash
+moon check --deny-warn                      # 三个目标均 0 warning
+moon test --deny-warn                       # 66 个测试
+moon check --target wasm-gc --deny-warn     # 核心包保持可移植
+moon check --target js --deny-warn
+moon test --enable-coverage                 # 覆盖率：库代码约 91%
+moon coverage report -f summary
+moon run cmd/httpdemo -- e2e                # 真实 HTTP 投递 + 验签，端到端
+```
+
+CI 在 native / wasm-gc / js 三个目标上执行 `check` 与 `test`，并校验
+`moon fmt --check`、`moon info` 生成的接口与仓库一致，最后跑一遍 `e2e` 冒烟测试。
 
 ## 核心功能
 
