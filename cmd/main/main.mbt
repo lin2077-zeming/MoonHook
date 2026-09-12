@@ -14,7 +14,54 @@ fn print_usage() -> Unit {
   println("  moon run cmd/main -- sign <secret> <payload>")
   println("  moon run cmd/main -- verify <secret> <payload> <signature>")
   println("  moon run cmd/main -- request <hook-id> <url> <secret> <payload>")
+  println("  moon run cmd/main -- providers")
+  println(
+    "  moon run cmd/main -- sign-provider <provider> <secret> <timestamp_s> <payload>",
+  )
   println("  moon run cmd/main -- help")
+}
+
+///|
+fn parse_seconds(text : String) -> Int? {
+  let value = @string.parse_int(text.trim()) catch { _ => return None }
+  Some(value)
+}
+
+///|
+fn run_providers() -> Unit {
+  println("supported outbound signature providers:")
+  for provider in @MoonHook.signature_providers() {
+    println("  \{provider.describe()}")
+  }
+}
+
+///|
+fn run_sign_provider(
+  name : String,
+  secret : String,
+  timestamp_s : Int,
+  payload : String,
+) -> Unit {
+  match @MoonHook.SignatureProvider::parse(name) {
+    None => {
+      println("unknown provider: \{name}")
+      run_providers()
+    }
+    Some(provider) => {
+      println("provider:  \{provider.describe()}")
+      println("signature: \{provider.sign_value(secret, payload, timestamp_s)}")
+      let headers = provider.sign_headers(secret, payload, timestamp_s)
+      if headers.length() == 0 {
+        println(
+          "body:      \{@MoonHook.feishu_bot_text_body(secret, payload, timestamp_s)}",
+        )
+      } else {
+        for header in headers {
+          println("\{header.0}: \{header.1}")
+        }
+      }
+    }
+  }
 }
 
 ///|
@@ -98,6 +145,18 @@ fn main {
         (arg_at(args, 2), arg_at(args, 3), arg_at(args, 4), arg_at(args, 5)) {
         (Some(hook_id), Some(url), Some(secret), Some(payload)) =>
           run_request(hook_id, url, secret, payload)
+        _ => print_usage()
+      }
+    "providers" => run_providers()
+    "sign-provider" =>
+      match
+        (arg_at(args, 2), arg_at(args, 3), arg_at(args, 4), arg_at(args, 5)) {
+        (Some(name), Some(secret), Some(timestamp), Some(payload)) =>
+          match parse_seconds(timestamp) {
+            Some(timestamp_s) =>
+              run_sign_provider(name, secret, timestamp_s, payload)
+            None => print_usage()
+          }
         _ => print_usage()
       }
     "help" => print_usage()

@@ -14,9 +14,19 @@ pub const HEADER_EVENT_ID : String = "X-MoonHook-Event-Id"
 
 pub const HEADER_EVENT_TYPE : String = "X-MoonHook-Event-Type"
 
+pub const HEADER_GITHUB_SIGNATURE : String = "X-Hub-Signature-256"
+
 pub const HEADER_IDEMPOTENCY_KEY : String = "X-MoonHook-Idempotency-Key"
 
+pub const HEADER_SHOPIFY_SIGNATURE : String = "X-Shopify-Hmac-Sha256"
+
 pub const HEADER_SIGNATURE : String = "X-MoonHook-Signature"
+
+pub const HEADER_SLACK_SIGNATURE : String = "X-Slack-Signature"
+
+pub const HEADER_SLACK_TIMESTAMP : String = "X-Slack-Request-Timestamp"
+
+pub const HEADER_STRIPE_SIGNATURE : String = "Stripe-Signature"
 
 pub const HEADER_SUBJECT : String = "X-MoonHook-Subject"
 
@@ -43,6 +53,8 @@ pub fn event_from_json_string(String) -> Result[WebhookEvent, String]
 pub fn event_to_json(WebhookEvent) -> Json
 
 pub fn event_to_json_string(WebhookEvent) -> String
+
+pub fn feishu_bot_text_body(String, String, Int) -> String
 
 pub fn find_header(Array[(String, String)], String) -> String?
 
@@ -75,6 +87,8 @@ pub fn sha256_hex(Bytes) -> String
 pub fn sign_hmac_sha256(String, String) -> String
 
 pub fn sign_webhook(String, Int, String) -> String
+
+pub fn signature_providers() -> Array[SignatureProvider]
 
 pub fn verify_hmac_sha256(String, String, String) -> Bool
 
@@ -285,6 +299,20 @@ pub fn RetryPolicy::next_delay_ms(Self, Int) -> Int
 pub fn RetryPolicy::should_retry(Self, Int, Int) -> Bool
 pub fn RetryPolicy::validate(Self) -> Result[Unit, String]
 
+pub(all) enum SignatureProvider {
+  GitHub
+  Stripe
+  Slack
+  FeishuBot
+  Shopify
+} derive(Eq, @debug.Debug)
+pub fn SignatureProvider::describe(Self) -> String
+pub fn SignatureProvider::header_names(Self) -> Array[String]
+pub fn SignatureProvider::parse(String) -> Self?
+pub fn SignatureProvider::sign_headers(Self, String, String, Int) -> Array[(String, String)]
+pub fn SignatureProvider::sign_value(Self, String, String, Int) -> String
+pub fn SignatureProvider::verify(Self, String, Array[(String, String)], String, Int, Int) -> Bool
+
 pub(all) struct SignedRequest {
   http_method : String
   url : String
@@ -292,6 +320,7 @@ pub(all) struct SignedRequest {
   body : String
   signature : String
 } derive(Eq, @debug.Debug)
+pub fn SignedRequest::with_provider_signature(Self, SignatureProvider, String, Int) -> Self
 
 pub(all) struct WebhookEvent {
   id : String

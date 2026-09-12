@@ -1,6 +1,7 @@
 import {
   "lin2077-zeming/MoonHook",
   "moonbitlang/core/env",
+  "moonbitlang/core/string",
 }
 
 pkgtype(kind: "executable")
