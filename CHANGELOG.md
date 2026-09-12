@@ -2,6 +2,22 @@
 
 All notable changes to MoonHook are documented in this file.
 
+## [0.3.2] - 2026-09-11
+
+### Changed
+
+- The module description now states the positioning explicitly: an
+  **outbound** webhook delivery framework. No library code changed in this
+  release.
+
+### Added
+
+- `docs/SCOPE.md`: what is in and out of scope for MoonHook, and how it
+  relates to webhook projects aimed at the inbound side.
+- CI gates on `--deny-warn` for `check` and `test` on native, wasm-gc and
+  js, fails when `moon info` would change the committed interfaces, prints
+  a coverage summary, and smoke-tests the end-to-end demo.
+
 ## [0.3.1] - 2026-09-11
 
 ### Added
