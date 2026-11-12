@@ -1,15 +1,16 @@
 ///|
 /// A Hook describes one webhook destination and its delivery policy.
+#derive(Eq, @debug.Debug)
 pub(all) struct Hook {
   id : String
   url : String
   secret : String
   headers : Array[(String, String)]
   active : Bool
-  max_attempts : Int
+  max_attempts : Int32
   retry_policy : RetryPolicy
-  timeout_ms : Int
-} derive(Eq, @debug.Debug)
+  timeout_ms : Int32
+}
 
 ///|
 /// Creates a Hook with safe defaults: active, three attempts, fixed 100ms
@@ -72,7 +73,7 @@ pub fn Hook::with_active(self : Hook, active : Bool) -> Hook {
 }
 
 ///|
-pub fn Hook::with_max_attempts(self : Hook, max_attempts : Int) -> Hook {
+pub fn Hook::with_max_attempts(self : Hook, max_attempts : Int32) -> Hook {
   {
     id: self.id,
     url: self.url,
@@ -100,7 +101,7 @@ pub fn Hook::with_retry_policy(self : Hook, retry_policy : RetryPolicy) -> Hook 
 }
 
 ///|
-pub fn Hook::with_timeout_ms(self : Hook, timeout_ms : Int) -> Hook {
+pub fn Hook::with_timeout_ms(self : Hook, timeout_ms : Int32) -> Hook {
   {
     id: self.id,
     url: self.url,

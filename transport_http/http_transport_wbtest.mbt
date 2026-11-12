@@ -71,7 +71,7 @@ async test "delivers a signed webhook over HTTP end to end" {
 
 ///|
 async test "retries a server error and succeeds on the second attempt" {
-  let requests : Array[Int] = []
+  let requests : Array[Int32] = []
   @async.with_task_group() <| group => {
     let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
     let port = server.addr.port()

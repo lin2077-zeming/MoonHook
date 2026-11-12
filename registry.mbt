@@ -1,8 +1,9 @@
 ///|
 /// An in-memory registry of registered webhook destinations.
+#derive(@debug.Debug)
 pub struct HookRegistry {
   hooks : @map.HashMap[String, Hook]
-} derive(@debug.Debug)
+}
 
 ///|
 pub fn HookRegistry::new() -> HookRegistry {
@@ -44,7 +45,7 @@ pub fn HookRegistry::list(self : HookRegistry) -> Array[Hook] {
 }
 
 ///|
-pub fn HookRegistry::count(self : HookRegistry) -> Int {
+pub fn HookRegistry::count(self : HookRegistry) -> Int32 {
   self.hooks.length()
 }
 

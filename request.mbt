@@ -1,12 +1,13 @@
 ///|
 /// A fully formed webhook HTTP request ready to be sent by an HTTP transport.
+#derive(Eq, @debug.Debug)
 pub(all) struct SignedRequest {
   http_method : String
   url : String
   headers : Array[(String, String)]
   body : String
   signature : String
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 /// HTTP header names used by MoonHook signed requests.
@@ -114,7 +115,7 @@ pub fn verify_webhook_request(
 /// Including the timestamp lets receivers reject replayed requests.
 pub fn sign_webhook(
   secret : String,
-  timestamp_ms : Int,
+  timestamp_ms : Int32,
   payload : String,
 ) -> String {
   sign_hmac_sha256(secret, timestamp_ms.to_string() + "." + payload)
@@ -125,11 +126,11 @@ pub fn sign_webhook(
 /// inside `[now_ms - tolerance_ms, now_ms + tolerance_ms]`.
 pub fn verify_webhook(
   secret : String,
-  timestamp_ms : Int,
+  timestamp_ms : Int32,
   payload : String,
   signature : String,
-  now_ms : Int,
-  tolerance_ms : Int,
+  now_ms : Int32,
+  tolerance_ms : Int32,
 ) -> Bool {
   let tolerance = if tolerance_ms < 0 { 0 } else { tolerance_ms }
   let in_window = timestamp_ms >= now_ms - tolerance &&
@@ -149,8 +150,8 @@ pub fn verify_webhook_request_with_timestamp(
   secret : String,
   headers : Array[(String, String)],
   body : String,
-  now_ms : Int,
-  tolerance_ms : Int,
+  now_ms : Int32,
+  tolerance_ms : Int32,
 ) -> Bool {
   match find_header(headers, HEADER_TIMESTAMP) {
     None => false

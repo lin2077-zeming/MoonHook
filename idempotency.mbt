@@ -1,17 +1,19 @@
 ///|
 /// Tracks when an idempotency key was first seen and when it expires.
+#derive(Eq, @debug.Debug)
 pub(all) struct IdempotencyRecord {
   event_id : String
-  first_seen_ms : Int
-  expires_at_ms : Int
-} derive(Eq, @debug.Debug)
+  first_seen_ms : Int32
+  expires_at_ms : Int32
+}
 
 ///|
 /// In-memory idempotency store. Keys are derived from event identity by the
 /// caller, typically through a SHA-256 digest of the event id and type.
+#derive(@debug.Debug)
 pub struct IdempotencyStore {
   records : @map.HashMap[String, IdempotencyRecord]
-} derive(@debug.Debug)
+}
 
 ///|
 pub fn IdempotencyStore::new() -> IdempotencyStore {
@@ -25,8 +27,8 @@ pub fn IdempotencyStore::check_and_mark(
   self : IdempotencyStore,
   key : String,
   event_id : String,
-  now_ms : Int,
-  ttl_ms : Int,
+  now_ms : Int32,
+  ttl_ms : Int32,
 ) -> Bool {
   let ttl = if ttl_ms < 0 { 0 } else { ttl_ms }
   let expires_at = now_ms + ttl
@@ -62,7 +64,7 @@ pub fn IdempotencyStore::get(
 }
 
 ///|
-pub fn IdempotencyStore::length(self : IdempotencyStore) -> Int {
+pub fn IdempotencyStore::length(self : IdempotencyStore) -> Int32 {
   self.records.length()
 }
 
@@ -71,7 +73,7 @@ pub fn IdempotencyStore::length(self : IdempotencyStore) -> Int {
 /// processing a batch so the table does not grow without bound.
 pub fn IdempotencyStore::clear_expired(
   self : IdempotencyStore,
-  now_ms : Int,
+  now_ms : Int32,
 ) -> Unit {
   let expired : Array[String] = []
   for item in self.records.iter() {

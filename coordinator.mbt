@@ -8,7 +8,7 @@ pub struct MoonHook {
   idempotency : IdempotencyStore
   audit : AuditLog
   engine : DeliveryEngine
-  idempotency_ttl_ms : Int
+  idempotency_ttl_ms : Int32
 }
 
 ///|
@@ -29,7 +29,7 @@ pub fn MoonHook::new(transport : Transport) -> MoonHook {
 ///|
 pub fn MoonHook::with_idempotency_ttl_ms(
   self : MoonHook,
-  idempotency_ttl_ms : Int,
+  idempotency_ttl_ms : Int32,
 ) -> MoonHook {
   {
     registry: self.registry,
@@ -48,17 +48,17 @@ pub fn MoonHook::register(self : MoonHook, hook : Hook) -> Result[Unit, String] 
 }
 
 ///|
-pub fn MoonHook::hook_count(self : MoonHook) -> Int {
+pub fn MoonHook::hook_count(self : MoonHook) -> Int32 {
   self.registry.count()
 }
 
 ///|
-pub fn MoonHook::outbox_length(self : MoonHook) -> Int {
+pub fn MoonHook::outbox_length(self : MoonHook) -> Int32 {
   self.outbox.length()
 }
 
 ///|
-pub fn MoonHook::dead_letter_length(self : MoonHook) -> Int {
+pub fn MoonHook::dead_letter_length(self : MoonHook) -> Int32 {
   self.dead_letter.length()
 }
 
@@ -79,7 +79,7 @@ pub fn MoonHook::enqueue(
   self : MoonHook,
   hook_id : String,
   event : WebhookEvent,
-  now_ms : Int,
+  now_ms : Int32,
 ) -> Result[Unit, String] {
   match self.registry.get(hook_id) {
     None => Err("hook not found: " + hook_id)
@@ -107,7 +107,7 @@ pub fn MoonHook::deliver_now(
   self : MoonHook,
   hook_id : String,
   event : WebhookEvent,
-  now_ms : Int,
+  now_ms : Int32,
 ) -> DeliveryOutcome {
   let outcome = self.engine.deliver(hook_id, event)
   self.record_audit(outcome, now_ms)
@@ -127,7 +127,7 @@ pub fn MoonHook::deliver_now(
 /// Drains the outbox through the delivery engine and returns the number of
 /// deliveries attempted. Skipped or failed deliveries land in the dead letter
 /// queue.
-pub fn MoonHook::drain(self : MoonHook, now_ms : Int) -> Int {
+pub fn MoonHook::drain(self : MoonHook, now_ms : Int32) -> Int32 {
   let pending = self.outbox.take_all()
   let mut delivered = 0
   for item in pending {
@@ -172,7 +172,7 @@ pub fn MoonHook::drain(self : MoonHook, now_ms : Int) -> Int {
 fn MoonHook::record_audit(
   self : MoonHook,
   outcome : DeliveryOutcome,
-  now_ms : Int,
+  now_ms : Int32,
 ) -> Unit {
   for attempt in outcome.attempts {
     self.audit.record({

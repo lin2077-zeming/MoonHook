@@ -25,7 +25,7 @@ fn json_string_field(map : Map[String, Json], key : String) -> String? {
 }
 
 ///|
-fn json_timestamp_field(map : Map[String, Json], key : String) -> Int? {
+fn json_timestamp_field(map : Map[String, Json], key : String) -> Int32? {
   match map.get(key) {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None
@@ -72,7 +72,7 @@ pub fn event_from_json_string(input : String) -> Result[WebhookEvent, String] {
 }
 
 ///|
-fn json_int_field(map : Map[String, Json], key : String) -> Int? {
+fn json_int_field(map : Map[String, Json], key : String) -> Int32? {
   match map.get(key) {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None

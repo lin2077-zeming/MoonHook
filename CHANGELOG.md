@@ -2,6 +2,44 @@
 
 All notable changes to MoonHook are documented in this file.
 
+## [0.4.1] - 2026-11-13
+
+Maintenance release for the quarterly compatibility review. No behavioural
+change to the library API; everything below is toolchain compatibility.
+
+### Changed
+
+- Verified on the current toolchain: `moon 0.1.20261104`,
+  `moonc v0.10.20+65efd5b93`, `core 0.10.20+65efd5b93`. The README now records
+  these versions and the minimum toolchain requirement.
+- Migrated all 20 `} derive(...)` clauses to the `#derive(...)` attribute syntax.
+  moonc v0.10.20 reports the old form as `deprecated_syntax`, which is an error
+  under `--deny-warn`.
+- Adopted the canonical `Int32` / `UInt32` spelling that `moon fmt` now
+  normalises to. `Int` / `UInt` are aliases of the same types
+  (`#alias(Int32)` in core), so this is source compatible for consumers.
+- `moonbitlang/async` 0.21.3 -> 0.22.9. async 0.22.9 needs core 0.10.20; it does
+  not compile on moonc v0.10.18 or older.
+- Reformatted the whole module with `moon fmt` from the new toolchain.
+
+### Added
+
+- `extends.mbt`: explicit `pub extend` declarations for every derived `Eq` and
+  `@debug.Debug` impl, following the convention used by `moonbitlang/core`.
+  moonc v0.10.18+ deprecates implicitly promoting derived trait methods to
+  regular methods (`implicit_impl_as_method`), which broke `--deny-warn`.
+  `Eq::equal` stays promoted; `Eq::not_equal` and `Debug::to_repr` remain
+  available but are deprecated and hidden from the generated interface.
+- CI runs `moon test --target js --deny-warn`, so all three supported targets
+  are tested and not merely type checked.
+
+### Fixed
+
+- Removed the unused `moonbitlang/core/array` and `moonbitlang/core/uint`
+  package imports (`unused_package`).
+- `MockTransport::new` uses `@ref.Ref(0)` instead of the deprecated
+  `@ref.new(0)`.
+
 ## [0.4.0] - 2026-09-11
 
 ### Added

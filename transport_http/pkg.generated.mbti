@@ -12,7 +12,7 @@ pub fn http_transport() -> async (@MoonHook.Hook, @MoonHook.WebhookEvent) -> @Mo
 
 pub async fn post_signed_request(@MoonHook.SignedRequest) -> @MoonHook.DeliveryResult
 
-pub fn webhook_receiver(String, Int, (String) -> Unit) -> async (@http.Request, &@io.Reader, @http.ServerConnection) -> Unit
+pub fn webhook_receiver(String, Int32, (String) -> Unit) -> async (@http.Request, &@io.Reader, @http.ServerConnection) -> Unit
 
 // Errors
 

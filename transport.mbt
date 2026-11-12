@@ -1,15 +1,16 @@
 ///|
 /// The outcome of one physical delivery attempt.
+#derive(Eq, @debug.Debug)
 pub(all) struct DeliveryResult {
   ok : Bool
   retryable : Bool
-  status_code : Int
+  status_code : Int32
   error : String
-  duration_ms : Int
-} derive(Eq, @debug.Debug)
+  duration_ms : Int32
+}
 
 ///|
-pub fn DeliveryResult::success(duration_ms : Int) -> DeliveryResult {
+pub fn DeliveryResult::success(duration_ms : Int32) -> DeliveryResult {
   { ok: true, retryable: false, status_code: 200, error: "", duration_ms, }
 }
 
@@ -17,17 +18,17 @@ pub fn DeliveryResult::success(duration_ms : Int) -> DeliveryResult {
 /// A successful attempt that records the status code reported by the receiver,
 /// so transports can distinguish `200` from `202` or `204`.
 pub fn DeliveryResult::success_with_status(
-  status_code : Int,
-  duration_ms : Int,
+  status_code : Int32,
+  duration_ms : Int32,
 ) -> DeliveryResult {
   { ok: true, retryable: false, status_code, error: "", duration_ms, }
 }
 
 ///|
 pub fn DeliveryResult::failure(
-  status_code : Int,
+  status_code : Int32,
   error : String,
-  duration_ms : Int,
+  duration_ms : Int32,
   retryable : Bool,
 ) -> DeliveryResult {
   { ok: false, retryable, status_code, error, duration_ms, }
@@ -41,14 +42,15 @@ pub type Transport = (Hook, WebhookEvent) -> DeliveryResult
 ///|
 /// A scripted transport used in tests. It returns the configured results in
 /// order and then reports retryable 500 errors once exhausted.
+#derive(@debug.Debug)
 pub struct MockTransport {
   results : Array[DeliveryResult]
-  next : @ref.Ref[Int]
-} derive(@debug.Debug)
+  next : @ref.Ref[Int32]
+}
 
 ///|
 pub fn MockTransport::new(results : Array[DeliveryResult]) -> MockTransport {
-  { results, next: @ref.new(0), }
+  { results, next: @ref.Ref(0), }
 }
 
 ///|

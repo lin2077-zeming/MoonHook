@@ -17,7 +17,7 @@
 /// ```
 pub fn webhook_receiver(
   secret : String,
-  tolerance_ms : Int,
+  tolerance_ms : Int32,
   on_event : (String) -> Unit,
 ) -> async (@http.Request, &@io.Reader, @http.ServerConnection) -> Unit {
   async fn(request, body, conn) {

@@ -1,20 +1,22 @@
 ///|
 /// One auditable delivery attempt.
+#derive(Eq, @debug.Debug)
 pub(all) struct AuditEntry {
-  timestamp_ms : Int
+  timestamp_ms : Int32
   hook_id : String
   event_id : String
-  attempt : Int
+  attempt : Int32
   status : String
   error : String
-  duration_ms : Int
-} derive(Eq, @debug.Debug)
+  duration_ms : Int32
+}
 
 ///|
 /// In-memory audit trail with a bounded recent-view helper.
+#derive(@debug.Debug)
 pub struct AuditLog {
   entries : Array[AuditEntry]
-} derive(@debug.Debug)
+}
 
 ///|
 pub fn AuditLog::new() -> AuditLog {
@@ -32,13 +34,13 @@ pub fn AuditLog::list(self : AuditLog) -> Array[AuditEntry] {
 }
 
 ///|
-pub fn AuditLog::length(self : AuditLog) -> Int {
+pub fn AuditLog::length(self : AuditLog) -> Int32 {
   self.entries.length()
 }
 
 ///|
 /// Returns the most recent `n` entries, or all entries when fewer exist.
-pub fn AuditLog::recent(self : AuditLog, n : Int) -> Array[AuditEntry] {
+pub fn AuditLog::recent(self : AuditLog, n : Int32) -> Array[AuditEntry] {
   if n <= 0 {
     []
   } else {

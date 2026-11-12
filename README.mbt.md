@@ -16,18 +16,38 @@
 
 ## 工程验证
 
+以下结果在 moon **0.1.20261104** / moonc **v0.10.20+65efd5b93** /
+core **0.10.20+65efd5b93** 上验证（用 `moon version --all` 复核）：
+
 ```bash
-moon check --deny-warn                      # 三个目标均 0 warning
-moon test --deny-warn                       # 75 个测试
+moon check --deny-warn                      # native：0 warning
+moon test --deny-warn                       # native：76 个测试
 moon check --target wasm-gc --deny-warn     # 核心包保持可移植
+moon test --target wasm-gc --deny-warn      # wasm-gc：71 个测试
 moon check --target js --deny-warn
-moon test --enable-coverage                 # 覆盖率：库代码 90% 以上（不含 CLI）
+moon test --target js --deny-warn           # js：71 个测试
+moon test --enable-coverage                 # 覆盖率：库代码约 91%（不含 CLI）
 moon coverage report -f summary
 moon run cmd/httpdemo -- e2e                # 真实 HTTP 投递 + 验签，端到端
 ```
 
-CI 在 native / wasm-gc / js 三个目标上执行 `check` 与 `test`，并校验
-`moon fmt --check`、`moon info` 生成的接口与仓库一致，最后跑一遍 `e2e` 冒烟测试。
+CI 在 native / wasm-gc / js 三个目标上执行 `check` 与 `test`（均带 `--deny-warn`），
+并校验 `moon fmt --check`、`moon info` 生成的接口与仓库一致，最后跑一遍 `e2e`
+冒烟测试。
+
+### 工具链要求
+
+需要 **moon >= 0.1.20261104**（moonc v0.10.20 / core 0.10.20），原因有二：
+
+- `moonbitlang/async@0.22.9` 的错误类型依赖新版 core 的派生实现，在
+  moonc v0.10.18 及更旧的工具链上无法编译；
+- 源码已迁移到 moonc v0.10.20 的规范写法：`#derive(...)` 取代 `} derive(...)`，
+  `Int32` / `UInt32` 取代别名 `Int` / `UInt`；在旧版工具链上 `moon fmt --check`
+  会判定格式不一致。
+
+工具链的安装与更新方式见 <https://www.moonbitlang.com/download/>。CI 安装官方
+`latest`（该 CDN 不提供按版本号下载，无法锁定版本），本节记录的是发布时实际
+验证通过的版本。
 
 ## 核心功能
 

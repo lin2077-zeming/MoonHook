@@ -3,12 +3,12 @@
 /// idempotency keys. No foreign function calls are involved.
 
 ///|
-fn rotr(value : UInt, shift : Int) -> UInt {
+fn rotr(value : UInt32, shift : Int32) -> UInt32 {
   (value >> shift) | (value << (32 - shift))
 }
 
 ///|
-fn to_uint_be(bytes : Array[Byte], offset : Int) -> UInt {
+fn to_uint_be(bytes : Array[Byte], offset : Int32) -> UInt32 {
   let b0 = bytes[offset].to_uint()
   let b1 = bytes[offset + 1].to_uint()
   let b2 = bytes[offset + 2].to_uint()
@@ -33,7 +33,7 @@ fn sha256_pad(data : Bytes) -> Array[Byte] {
 }
 
 ///|
-fn sha256_k() -> Array[UInt] {
+fn sha256_k() -> Array[UInt32] {
   [
     0x428a2f98U, 0x71374491U, 0xb5c0fbcfU, 0xe9b5dba5U, 0x3956c25bU, 0x59f111f1U,
     0x923f82a4U, 0xab1c5ed5U, 0xd807aa98U, 0x12835b01U, 0x243185beU, 0x550c7dc3U,
@@ -50,7 +50,7 @@ fn sha256_k() -> Array[UInt] {
 }
 
 ///|
-fn sha256_init() -> Array[UInt] {
+fn sha256_init() -> Array[UInt32] {
   [
     0x6a09e667U, 0xbb67ae85U, 0x3c6ef372U, 0xa54ff53aU, 0x510e527fU, 0x9b05688cU,
     0x1f83d9abU, 0x5be0cd19U,

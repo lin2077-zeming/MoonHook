@@ -1,5 +1,5 @@
 ///|
-fn arg_at(args : Array[String], index : Int) -> String? {
+fn arg_at(args : Array[String], index : Int32) -> String? {
   if index < args.length() {
     Some(args[index])
   } else {
@@ -22,7 +22,7 @@ fn print_usage() -> Unit {
 }
 
 ///|
-fn parse_seconds(text : String) -> Int? {
+fn parse_seconds(text : String) -> Int32? {
   let value = @string.parse_int(text.trim()) catch { _ => return None }
   Some(value)
 }
@@ -39,7 +39,7 @@ fn run_providers() -> Unit {
 fn run_sign_provider(
   name : String,
   secret : String,
-  timestamp_s : Int,
+  timestamp_s : Int32,
   payload : String,
 ) -> Unit {
   match @MoonHook.SignatureProvider::parse(name) {

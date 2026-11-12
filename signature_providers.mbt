@@ -18,13 +18,14 @@
 ///   the official custom-bot sample.
 /// - `Shopify`: `X-Shopify-Hmac-Sha256: <base64>`, HMAC-SHA256 over the raw
 ///   body.
+#derive(Eq, @debug.Debug)
 pub(all) enum SignatureProvider {
   GitHub
   Stripe
   Slack
   FeishuBot
   Shopify
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 /// The header GitHub uses for the raw-body HMAC-SHA256 signature.
@@ -62,13 +63,13 @@ fn hmac_base64(key : String, message : String) -> String {
 
 ///|
 /// `"<timestamp>.<body>"`, the Stripe signed payload.
-fn stripe_signed_payload(timestamp_s : Int, payload : String) -> String {
+fn stripe_signed_payload(timestamp_s : Int32, payload : String) -> String {
   timestamp_s.to_string() + "." + payload
 }
 
 ///|
 /// `"v0:<timestamp>:<body>"`, the Slack signed payload.
-fn slack_signed_payload(timestamp_s : Int, payload : String) -> String {
+fn slack_signed_payload(timestamp_s : Int32, payload : String) -> String {
   "v0:" + timestamp_s.to_string() + ":" + payload
 }
 
@@ -78,13 +79,13 @@ fn slack_signed_payload(timestamp_s : Int, payload : String) -> String {
 ///
 /// The timestamp is the HMAC *key* material here, not part of the message,
 /// which is why this scheme does not reuse the signed-payload helpers.
-fn feishu_bot_sign(secret : String, timestamp_s : Int) -> String {
+fn feishu_bot_sign(secret : String, timestamp_s : Int32) -> String {
   hmac_base64(timestamp_s.to_string() + "\n" + secret, "")
 }
 
 ///|
 /// Parses a timestamp expressed in seconds, accepting surrounding whitespace.
-fn parse_seconds(value : String) -> Int? {
+fn parse_seconds(value : String) -> Int32? {
   let parsed = @string.parse_int(value.trim()) catch { _ => return None }
   Some(parsed)
 }
@@ -93,7 +94,11 @@ fn parse_seconds(value : String) -> Int? {
 /// True when `timestamp_s` is inside the allowed window. A negative
 /// `tolerance_s` disables the window check, which is useful for schemes
 /// without a timestamp.
-fn within_window(timestamp_s : Int, now_s : Int, tolerance_s : Int) -> Bool {
+fn within_window(
+  timestamp_s : Int32,
+  now_s : Int32,
+  tolerance_s : Int32,
+) -> Bool {
   if tolerance_s < 0 {
     true
   } else {
@@ -141,7 +146,7 @@ pub fn SignatureProvider::sign_value(
   self : SignatureProvider,
   secret : String,
   payload : String,
-  timestamp_s : Int,
+  timestamp_s : Int32,
 ) -> String {
   match self {
     GitHub => hmac_hex(secret, payload)
@@ -162,7 +167,7 @@ pub fn SignatureProvider::sign_headers(
   self : SignatureProvider,
   secret : String,
   payload : String,
-  timestamp_s : Int,
+  timestamp_s : Int32,
 ) -> Array[(String, String)] {
   let headers : Array[(String, String)] = []
   match self {
@@ -254,8 +259,8 @@ pub fn SignatureProvider::verify(
   secret : String,
   headers : Array[(String, String)],
   payload : String,
-  now_s : Int,
-  tolerance_s : Int,
+  now_s : Int32,
+  tolerance_s : Int32,
 ) -> Bool {
   match self {
     GitHub =>
@@ -293,7 +298,7 @@ pub fn SignatureProvider::verify(
     Stripe =>
       match find_header(headers, HEADER_STRIPE_SIGNATURE) {
         Some(value) => {
-          let mut timestamp_s : Int? = None
+          let mut timestamp_s : Int32? = None
           let candidates : Array[String] = []
           for part in split_signed_header(value) {
             if part.0 == "t" {
@@ -356,7 +361,7 @@ pub fn SignatureProvider::verify(
 pub fn feishu_bot_text_body(
   secret : String,
   text : String,
-  timestamp_s : Int,
+  timestamp_s : Int32,
 ) -> String {
   Json::object({
     "timestamp": Json::string(timestamp_s.to_string()),
@@ -377,7 +382,7 @@ pub fn SignedRequest::with_provider_signature(
   self : SignedRequest,
   provider : SignatureProvider,
   secret : String,
-  timestamp_s : Int,
+  timestamp_s : Int32,
 ) -> SignedRequest {
   let headers = self.headers.copy()
   for header in provider.sign_headers(secret, self.body, timestamp_s) {

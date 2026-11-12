@@ -3,12 +3,13 @@
 ///
 /// `Retry` is reserved for scheduler-driven delivery; the synchronous
 /// `DeliveryEngine::deliver` reports `Success`, `DeadLetter`, or `Skipped`.
+#derive(Eq, @debug.Debug)
 pub(all) enum DeliveryStatus {
   Success
   Retry
   DeadLetter
   Skipped
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 pub fn DeliveryStatus::describe(self : DeliveryStatus) -> String {
@@ -22,21 +23,23 @@ pub fn DeliveryStatus::describe(self : DeliveryStatus) -> String {
 
 ///|
 /// A single recorded attempt inside a delivery.
+#derive(Eq, @debug.Debug)
 pub(all) struct DeliveryAttempt {
-  attempt : Int
-  status_code : Int
+  attempt : Int32
+  status_code : Int32
   error : String
-  duration_ms : Int
-} derive(Eq, @debug.Debug)
+  duration_ms : Int32
+}
 
 ///|
 /// The complete outcome of `DeliveryEngine::deliver`.
+#derive(Eq, @debug.Debug)
 pub(all) struct DeliveryOutcome {
   hook_id : String
   event_id : String
   status : DeliveryStatus
   attempts : Array[DeliveryAttempt]
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 /// Drives delivery: looks up the Hook, executes transport attempts, and

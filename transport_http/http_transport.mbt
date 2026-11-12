@@ -8,14 +8,14 @@ pub type AsyncTransport = async (@MoonHook.Hook, @MoonHook.WebhookEvent) -> @Moo
 
 ///|
 /// True when the receiver accepted the delivery.
-fn is_success_status(status_code : Int) -> Bool {
+fn is_success_status(status_code : Int32) -> Bool {
   status_code >= 200 && status_code <= 299
 }
 
 ///|
 /// True for status codes that are worth another attempt: request timeout,
 /// too early, rate limiting, and every server error.
-fn is_retryable_status(status_code : Int) -> Bool {
+fn is_retryable_status(status_code : Int32) -> Bool {
   status_code == 408 ||
   status_code == 425 ||
   status_code == 429 ||

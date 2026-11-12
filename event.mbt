@@ -1,13 +1,14 @@
 ///|
 /// A webhook event is the immutable payload delivered to a Hook.
+#derive(Eq, @debug.Debug)
 pub(all) struct WebhookEvent {
   id : String
   event_type : String
   subject : String
   payload : String
-  timestamp_ms : Int
+  timestamp_ms : Int32
   idempotency_key : String
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 /// Constructs a `WebhookEvent` directly. Prefer `EventBuilder` for validation.
@@ -16,7 +17,7 @@ pub fn WebhookEvent::new(
   event_type : String,
   subject : String,
   payload : String,
-  timestamp_ms : Int,
+  timestamp_ms : Int32,
   idempotency_key : String,
 ) -> WebhookEvent {
   { id, event_type, subject, payload, timestamp_ms, idempotency_key, }
@@ -24,14 +25,15 @@ pub fn WebhookEvent::new(
 
 ///|
 /// Builder for `WebhookEvent` with validation in `build`.
+#derive(Eq, @debug.Debug)
 pub(all) struct EventBuilder {
   id : String
   event_type : String
   subject : String
   payload : String
-  timestamp_ms : Int
+  timestamp_ms : Int32
   idempotency_key : String
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 pub fn EventBuilder::new() -> EventBuilder {
@@ -105,7 +107,7 @@ pub fn EventBuilder::with_payload(
 ///|
 pub fn EventBuilder::with_timestamp_ms(
   self : EventBuilder,
-  timestamp_ms : Int,
+  timestamp_ms : Int32,
 ) -> EventBuilder {
   {
     id: self.id,

@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/core/array",
   "moonbitlang/core/builtin",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/base64",
@@ -9,7 +8,6 @@ import {
   "moonbitlang/core/math",
   "moonbitlang/core/ref",
   "moonbitlang/core/string",
-  "moonbitlang/core/uint",
 }
 
 import {

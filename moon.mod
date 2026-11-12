@@ -11,7 +11,7 @@
 
 name = "lin2077-zeming/MoonHook"
 
-version = "0.4.0"
+version = "0.4.1"
 
 readme = "README.mbt.md"
 
@@ -39,5 +39,5 @@ preferred_target = "native"
 description = "Outbound webhook delivery framework for MoonBit: signing, retry with backoff, outbox, dead letter, idempotency, audit, and real HTTP delivery over moonbitlang/async."
 
 import {
-  "moonbitlang/async@0.21.3",
+  "moonbitlang/async@0.22.9",
 }

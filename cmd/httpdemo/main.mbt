@@ -32,8 +32,8 @@ fn build_event(payload : String) -> @MoonHook.WebhookEvent {
 fn build_engine(
   url : String,
   secret : String,
-  retry_ms : Int,
-  max_attempts : Int,
+  retry_ms : Int32,
+  max_attempts : Int32,
 ) -> @transport_http.AsyncDeliveryEngine {
   let registry = @MoonHook.HookRegistry::new()
   let hook = @MoonHook.Hook::new("orders", url)
@@ -58,7 +58,7 @@ fn report(outcome : @MoonHook.DeliveryOutcome) -> Unit {
 }
 
 ///|
-async fn run_e2e(port : Int) -> Unit {
+async fn run_e2e(port : Int32) -> Unit {
   let received : Array[String] = []
   @async.with_task_group() <| group => {
     let server = @http.Server(@socket.Addr::parse("127.0.0.1:\{port}"))

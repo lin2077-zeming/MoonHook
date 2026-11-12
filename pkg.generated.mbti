@@ -4,6 +4,7 @@ package "lin2077-zeming/MoonHook"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/hashmap",
+  "moonbitlang/core/json",
   "moonbitlang/core/ref",
 }
 
@@ -38,47 +39,47 @@ pub fn bytes_to_hex(Array[Byte]) -> String
 
 pub fn constant_time_eq(String, String) -> Bool
 
-pub fn dead_letter_from_json(Json) -> Result[DeadLetterEntry, String]
+pub fn dead_letter_from_json(@json.Json) -> Result[DeadLetterEntry, String]
 
 pub fn dead_letter_from_json_string(String) -> Result[DeadLetterEntry, String]
 
-pub fn dead_letter_to_json(DeadLetterEntry) -> Json
+pub fn dead_letter_to_json(DeadLetterEntry) -> @json.Json
 
 pub fn dead_letter_to_json_string(DeadLetterEntry) -> String
 
-pub fn event_from_json(Json) -> Result[WebhookEvent, String]
+pub fn event_from_json(@json.Json) -> Result[WebhookEvent, String]
 
 pub fn event_from_json_string(String) -> Result[WebhookEvent, String]
 
-pub fn event_to_json(WebhookEvent) -> Json
+pub fn event_to_json(WebhookEvent) -> @json.Json
 
 pub fn event_to_json_string(WebhookEvent) -> String
 
-pub fn feishu_bot_text_body(String, String, Int) -> String
+pub fn feishu_bot_text_body(String, String, Int32) -> String
 
 pub fn find_header(Array[(String, String)], String) -> String?
 
 pub fn hmac_sha256(Bytes, Bytes) -> Array[Byte]
 
-pub fn hook_from_json(Json) -> Result[Hook, String]
+pub fn hook_from_json(@json.Json) -> Result[Hook, String]
 
 pub fn hook_from_json_string(String) -> Result[Hook, String]
 
-pub fn hook_to_json(Hook) -> Json
+pub fn hook_to_json(Hook) -> @json.Json
 
 pub fn hook_to_json_string(Hook) -> String
 
-pub fn pending_delivery_from_json(Json) -> Result[PendingDelivery, String]
+pub fn pending_delivery_from_json(@json.Json) -> Result[PendingDelivery, String]
 
 pub fn pending_delivery_from_json_string(String) -> Result[PendingDelivery, String]
 
-pub fn pending_delivery_to_json(PendingDelivery) -> Json
+pub fn pending_delivery_to_json(PendingDelivery) -> @json.Json
 
 pub fn pending_delivery_to_json_string(PendingDelivery) -> String
 
-pub fn retry_policy_from_json(Json) -> Result[RetryPolicy, String]
+pub fn retry_policy_from_json(@json.Json) -> Result[RetryPolicy, String]
 
-pub fn retry_policy_to_json(RetryPolicy) -> Json
+pub fn retry_policy_to_json(RetryPolicy) -> @json.Json
 
 pub fn sha256(Bytes) -> Array[Byte]
 
@@ -86,7 +87,7 @@ pub fn sha256_hex(Bytes) -> String
 
 pub fn sign_hmac_sha256(String, String) -> String
 
-pub fn sign_webhook(String, Int, String) -> String
+pub fn sign_webhook(String, Int32, String) -> String
 
 pub fn signature_providers() -> Array[SignatureProvider]
 
@@ -96,48 +97,55 @@ pub fn verify_signature_header(String, String, String) -> Bool
 
 pub fn verify_signed_request(String, SignedRequest) -> Bool
 
-pub fn verify_webhook(String, Int, String, String, Int, Int) -> Bool
+pub fn verify_webhook(String, Int32, String, String, Int32, Int32) -> Bool
 
 pub fn verify_webhook_request(String, Array[(String, String)], String) -> Bool
 
-pub fn verify_webhook_request_with_timestamp(String, Array[(String, String)], String, Int, Int) -> Bool
+pub fn verify_webhook_request_with_timestamp(String, Array[(String, String)], String, Int32, Int32) -> Bool
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct AuditEntry {
-  timestamp_ms : Int
+  timestamp_ms : Int32
   hook_id : String
   event_id : String
-  attempt : Int
+  attempt : Int32
   status : String
   error : String
-  duration_ms : Int
-} derive(Eq, @debug.Debug)
+  duration_ms : Int32
+}
+pub fn AuditEntry::equal(Self, Self) -> Bool
 
+#derive(@debug.Debug)
 pub struct AuditLog {
   entries : Array[AuditEntry]
-} derive(@debug.Debug)
-pub fn AuditLog::length(Self) -> Int
+}
+pub fn AuditLog::length(Self) -> Int32
 pub fn AuditLog::list(Self) -> Array[AuditEntry]
 pub fn AuditLog::new() -> Self
-pub fn AuditLog::recent(Self, Int) -> Array[AuditEntry]
+pub fn AuditLog::recent(Self, Int32) -> Array[AuditEntry]
 pub fn AuditLog::record(Self, AuditEntry) -> Unit
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeadLetterEntry {
   hook_id : String
   event : WebhookEvent
   reason : String
-  failed_at_ms : Int
-  attempts : Int
-} derive(Eq, @debug.Debug)
+  failed_at_ms : Int32
+  attempts : Int32
+}
+pub fn DeadLetterEntry::equal(Self, Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeliveryAttempt {
-  attempt : Int
-  status_code : Int
+  attempt : Int32
+  status_code : Int32
   error : String
-  duration_ms : Int
-} derive(Eq, @debug.Debug)
+  duration_ms : Int32
+}
+pub fn DeliveryAttempt::equal(Self, Self) -> Bool
 
 pub struct DeliveryEngine {
   registry : HookRegistry
@@ -146,117 +154,134 @@ pub struct DeliveryEngine {
 pub fn DeliveryEngine::deliver(Self, String, WebhookEvent) -> DeliveryOutcome
 pub fn DeliveryEngine::new(HookRegistry, (Hook, WebhookEvent) -> DeliveryResult) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeliveryOutcome {
   hook_id : String
   event_id : String
   status : DeliveryStatus
   attempts : Array[DeliveryAttempt]
-} derive(Eq, @debug.Debug)
+}
+pub fn DeliveryOutcome::equal(Self, Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeliveryResult {
   ok : Bool
   retryable : Bool
-  status_code : Int
+  status_code : Int32
   error : String
-  duration_ms : Int
-} derive(Eq, @debug.Debug)
-pub fn DeliveryResult::failure(Int, String, Int, Bool) -> Self
-pub fn DeliveryResult::success(Int) -> Self
-pub fn DeliveryResult::success_with_status(Int, Int) -> Self
+  duration_ms : Int32
+}
+pub fn DeliveryResult::equal(Self, Self) -> Bool
+pub fn DeliveryResult::failure(Int32, String, Int32, Bool) -> Self
+pub fn DeliveryResult::success(Int32) -> Self
+pub fn DeliveryResult::success_with_status(Int32, Int32) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum DeliveryStatus {
   Success
   Retry
   DeadLetter
   Skipped
-} derive(Eq, @debug.Debug)
+}
 pub fn DeliveryStatus::describe(Self) -> String
+pub fn DeliveryStatus::equal(Self, Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct EventBuilder {
   id : String
   event_type : String
   subject : String
   payload : String
-  timestamp_ms : Int
+  timestamp_ms : Int32
   idempotency_key : String
-} derive(Eq, @debug.Debug)
+}
 pub fn EventBuilder::build(Self) -> Result[WebhookEvent, String]
+pub fn EventBuilder::equal(Self, Self) -> Bool
 pub fn EventBuilder::new() -> Self
 pub fn EventBuilder::with_event_type(Self, String) -> Self
 pub fn EventBuilder::with_id(Self, String) -> Self
 pub fn EventBuilder::with_idempotency_key(Self, String) -> Self
 pub fn EventBuilder::with_payload(Self, String) -> Self
 pub fn EventBuilder::with_subject(Self, String) -> Self
-pub fn EventBuilder::with_timestamp_ms(Self, Int) -> Self
+pub fn EventBuilder::with_timestamp_ms(Self, Int32) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Hook {
   id : String
   url : String
   secret : String
   headers : Array[(String, String)]
   active : Bool
-  max_attempts : Int
+  max_attempts : Int32
   retry_policy : RetryPolicy
-  timeout_ms : Int
-} derive(Eq, @debug.Debug)
+  timeout_ms : Int32
+}
+pub fn Hook::equal(Self, Self) -> Bool
 pub fn Hook::header_value(Self, String) -> String?
 pub fn Hook::new(String, String) -> Self
 pub fn Hook::validate(Self) -> Result[Unit, String]
 pub fn Hook::with_active(Self, Bool) -> Self
 pub fn Hook::with_header(Self, String, String) -> Self
-pub fn Hook::with_max_attempts(Self, Int) -> Self
+pub fn Hook::with_max_attempts(Self, Int32) -> Self
 pub fn Hook::with_retry_policy(Self, RetryPolicy) -> Self
 pub fn Hook::with_secret(Self, String) -> Self
-pub fn Hook::with_timeout_ms(Self, Int) -> Self
+pub fn Hook::with_timeout_ms(Self, Int32) -> Self
 
+#derive(@debug.Debug)
 pub struct HookRegistry {
   hooks : @hashmap.HashMap[String, Hook]
-} derive(@debug.Debug)
+}
 pub fn HookRegistry::contains(Self, String) -> Bool
-pub fn HookRegistry::count(Self) -> Int
+pub fn HookRegistry::count(Self) -> Int32
 pub fn HookRegistry::get(Self, String) -> Hook?
 pub fn HookRegistry::list(Self) -> Array[Hook]
 pub fn HookRegistry::new() -> Self
 pub fn HookRegistry::register(Self, Hook) -> Result[Unit, String]
 pub fn HookRegistry::unregister(Self, String) -> Unit
 
+#derive(Eq, @debug.Debug)
 pub(all) struct IdempotencyRecord {
   event_id : String
-  first_seen_ms : Int
-  expires_at_ms : Int
-} derive(Eq, @debug.Debug)
+  first_seen_ms : Int32
+  expires_at_ms : Int32
+}
+pub fn IdempotencyRecord::equal(Self, Self) -> Bool
 
+#derive(@debug.Debug)
 pub struct IdempotencyStore {
   records : @hashmap.HashMap[String, IdempotencyRecord]
-} derive(@debug.Debug)
-pub fn IdempotencyStore::check_and_mark(Self, String, String, Int, Int) -> Bool
-pub fn IdempotencyStore::clear_expired(Self, Int) -> Unit
+}
+pub fn IdempotencyStore::check_and_mark(Self, String, String, Int32, Int32) -> Bool
+pub fn IdempotencyStore::clear_expired(Self, Int32) -> Unit
 pub fn IdempotencyStore::get(Self, String) -> IdempotencyRecord?
-pub fn IdempotencyStore::length(Self) -> Int
+pub fn IdempotencyStore::length(Self) -> Int32
 pub fn IdempotencyStore::new() -> Self
 
+#derive(@debug.Debug)
 pub struct InMemoryDeadLetter {
   entries : Array[DeadLetterEntry]
-} derive(@debug.Debug)
+}
 pub fn InMemoryDeadLetter::clear(Self) -> Unit
-pub fn InMemoryDeadLetter::length(Self) -> Int
+pub fn InMemoryDeadLetter::length(Self) -> Int32
 pub fn InMemoryDeadLetter::list(Self) -> Array[DeadLetterEntry]
 pub fn InMemoryDeadLetter::new() -> Self
 pub fn InMemoryDeadLetter::push(Self, DeadLetterEntry) -> Unit
 
+#derive(@debug.Debug)
 pub struct InMemoryOutbox {
   entries : Array[PendingDelivery]
-} derive(@debug.Debug)
-pub fn InMemoryOutbox::enqueue(Self, String, WebhookEvent, Int) -> Unit
+}
+pub fn InMemoryOutbox::enqueue(Self, String, WebhookEvent, Int32) -> Unit
 pub fn InMemoryOutbox::is_empty(Self) -> Bool
-pub fn InMemoryOutbox::length(Self) -> Int
+pub fn InMemoryOutbox::length(Self) -> Int32
 pub fn InMemoryOutbox::new() -> Self
 pub fn InMemoryOutbox::take_all(Self) -> Array[PendingDelivery]
 
+#derive(@debug.Debug)
 pub struct MockTransport {
   results : Array[DeliveryResult]
-  next : @ref.Ref[Int]
-} derive(@debug.Debug)
+  next : @ref.Ref[Int32]
+}
 pub fn MockTransport::as_transport(Self) -> (Hook, WebhookEvent) -> DeliveryResult
 pub fn MockTransport::new(Array[DeliveryResult]) -> Self
 pub fn MockTransport::send(Self, Hook, WebhookEvent) -> DeliveryResult
@@ -268,69 +293,79 @@ pub struct MoonHook {
   idempotency : IdempotencyStore
   audit : AuditLog
   engine : DeliveryEngine
-  idempotency_ttl_ms : Int
+  idempotency_ttl_ms : Int32
 }
 pub fn MoonHook::audit_entries(Self) -> Array[AuditEntry]
-pub fn MoonHook::dead_letter_length(Self) -> Int
+pub fn MoonHook::dead_letter_length(Self) -> Int32
 pub fn MoonHook::dead_letters(Self) -> Array[DeadLetterEntry]
-pub fn MoonHook::deliver_now(Self, String, WebhookEvent, Int) -> DeliveryOutcome
-pub fn MoonHook::drain(Self, Int) -> Int
-pub fn MoonHook::enqueue(Self, String, WebhookEvent, Int) -> Result[Unit, String]
-pub fn MoonHook::hook_count(Self) -> Int
+pub fn MoonHook::deliver_now(Self, String, WebhookEvent, Int32) -> DeliveryOutcome
+pub fn MoonHook::drain(Self, Int32) -> Int32
+pub fn MoonHook::enqueue(Self, String, WebhookEvent, Int32) -> Result[Unit, String]
+pub fn MoonHook::hook_count(Self) -> Int32
 pub fn MoonHook::new((Hook, WebhookEvent) -> DeliveryResult) -> Self
-pub fn MoonHook::outbox_length(Self) -> Int
+pub fn MoonHook::outbox_length(Self) -> Int32
 pub fn MoonHook::register(Self, Hook) -> Result[Unit, String]
-pub fn MoonHook::with_idempotency_ttl_ms(Self, Int) -> Self
+pub fn MoonHook::with_idempotency_ttl_ms(Self, Int32) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct PendingDelivery {
   hook_id : String
   event : WebhookEvent
-  queued_at_ms : Int
-  attempts_used : Int
-} derive(Eq, @debug.Debug)
+  queued_at_ms : Int32
+  attempts_used : Int32
+}
+pub fn PendingDelivery::equal(Self, Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RetryPolicy {
   None
-  Fixed(Int)
-  Exponential(Int, Double, Int)
-} derive(Eq, @debug.Debug)
+  Fixed(Int32)
+  Exponential(Int32, Double, Int32)
+}
 pub fn RetryPolicy::describe(Self) -> String
-pub fn RetryPolicy::next_delay_ms(Self, Int) -> Int
-pub fn RetryPolicy::should_retry(Self, Int, Int) -> Bool
+pub fn RetryPolicy::equal(Self, Self) -> Bool
+pub fn RetryPolicy::next_delay_ms(Self, Int32) -> Int32
+pub fn RetryPolicy::should_retry(Self, Int32, Int32) -> Bool
 pub fn RetryPolicy::validate(Self) -> Result[Unit, String]
 
+#derive(Eq, @debug.Debug)
 pub(all) enum SignatureProvider {
   GitHub
   Stripe
   Slack
   FeishuBot
   Shopify
-} derive(Eq, @debug.Debug)
+}
 pub fn SignatureProvider::describe(Self) -> String
+pub fn SignatureProvider::equal(Self, Self) -> Bool
 pub fn SignatureProvider::header_names(Self) -> Array[String]
 pub fn SignatureProvider::parse(String) -> Self?
-pub fn SignatureProvider::sign_headers(Self, String, String, Int) -> Array[(String, String)]
-pub fn SignatureProvider::sign_value(Self, String, String, Int) -> String
-pub fn SignatureProvider::verify(Self, String, Array[(String, String)], String, Int, Int) -> Bool
+pub fn SignatureProvider::sign_headers(Self, String, String, Int32) -> Array[(String, String)]
+pub fn SignatureProvider::sign_value(Self, String, String, Int32) -> String
+pub fn SignatureProvider::verify(Self, String, Array[(String, String)], String, Int32, Int32) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct SignedRequest {
   http_method : String
   url : String
   headers : Array[(String, String)]
   body : String
   signature : String
-} derive(Eq, @debug.Debug)
-pub fn SignedRequest::with_provider_signature(Self, SignatureProvider, String, Int) -> Self
+}
+pub fn SignedRequest::equal(Self, Self) -> Bool
+pub fn SignedRequest::with_provider_signature(Self, SignatureProvider, String, Int32) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WebhookEvent {
   id : String
   event_type : String
   subject : String
   payload : String
-  timestamp_ms : Int
+  timestamp_ms : Int32
   idempotency_key : String
-} derive(Eq, @debug.Debug)
-pub fn WebhookEvent::new(String, String, String, String, Int, String) -> Self
+}
+pub fn WebhookEvent::equal(Self, Self) -> Bool
+pub fn WebhookEvent::new(String, String, String, String, Int32, String) -> Self
 
 // Type aliases
 pub type Transport = (Hook, WebhookEvent) -> DeliveryResult

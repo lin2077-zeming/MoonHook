@@ -5,16 +5,17 @@
 /// - `Fixed(delay_ms)`: every retry waits the same delay.
 /// - `Exponential(initial_ms, multiplier, max_ms)`: delay grows by a multiplier,
 ///   capped at `max_ms`.
+#derive(Eq, @debug.Debug)
 pub(all) enum RetryPolicy {
   None
-  Fixed(Int)
-  Exponential(Int, Double, Int)
-} derive(Eq, @debug.Debug)
+  Fixed(Int32)
+  Exponential(Int32, Double, Int32)
+}
 
 ///|
 /// Returns the delay before retry `attempt`, where attempt starts at 1 for the
 /// first retry after the initial failure.
-pub fn RetryPolicy::next_delay_ms(self : RetryPolicy, attempt : Int) -> Int {
+pub fn RetryPolicy::next_delay_ms(self : RetryPolicy, attempt : Int32) -> Int32 {
   match self {
     None => 0
     Fixed(delay_ms) =>
@@ -75,8 +76,8 @@ pub fn RetryPolicy::validate(self : RetryPolicy) -> Result[Unit, String] {
 /// Returns true when another attempt is allowed.
 pub fn RetryPolicy::should_retry(
   self : RetryPolicy,
-  attempt : Int,
-  max_attempts : Int,
+  attempt : Int32,
+  max_attempts : Int32,
 ) -> Bool {
   match self {
     None => false

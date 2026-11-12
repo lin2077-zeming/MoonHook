@@ -1,28 +1,31 @@
 ///|
 /// A queued delivery waiting to be processed by a scheduler.
+#derive(Eq, @debug.Debug)
 pub(all) struct PendingDelivery {
   hook_id : String
   event : WebhookEvent
-  queued_at_ms : Int
-  attempts_used : Int
-} derive(Eq, @debug.Debug)
+  queued_at_ms : Int32
+  attempts_used : Int32
+}
 
 ///|
 /// A delivery that permanently failed and was moved to the dead letter queue.
+#derive(Eq, @debug.Debug)
 pub(all) struct DeadLetterEntry {
   hook_id : String
   event : WebhookEvent
   reason : String
-  failed_at_ms : Int
-  attempts : Int
-} derive(Eq, @debug.Debug)
+  failed_at_ms : Int32
+  attempts : Int32
+}
 
 ///|
 /// In-memory outbox. Use this as the default in tests and single-process
 /// applications; a durable implementation can swap in behind the same shape.
+#derive(@debug.Debug)
 pub struct InMemoryOutbox {
   entries : Array[PendingDelivery]
-} derive(@debug.Debug)
+}
 
 ///|
 pub fn InMemoryOutbox::new() -> InMemoryOutbox {
@@ -34,7 +37,7 @@ pub fn InMemoryOutbox::enqueue(
   self : InMemoryOutbox,
   hook_id : String,
   event : WebhookEvent,
-  now_ms : Int,
+  now_ms : Int32,
 ) -> Unit {
   self.entries.push({ hook_id, event, queued_at_ms: now_ms, attempts_used: 0, })
 }
@@ -52,7 +55,7 @@ pub fn InMemoryOutbox::take_all(
 }
 
 ///|
-pub fn InMemoryOutbox::length(self : InMemoryOutbox) -> Int {
+pub fn InMemoryOutbox::length(self : InMemoryOutbox) -> Int32 {
   self.entries.length()
 }
 
@@ -62,9 +65,10 @@ pub fn InMemoryOutbox::is_empty(self : InMemoryOutbox) -> Bool {
 }
 
 ///|
+#derive(@debug.Debug)
 pub struct InMemoryDeadLetter {
   entries : Array[DeadLetterEntry]
-} derive(@debug.Debug)
+}
 
 ///|
 pub fn InMemoryDeadLetter::new() -> InMemoryDeadLetter {
@@ -87,7 +91,7 @@ pub fn InMemoryDeadLetter::list(
 }
 
 ///|
-pub fn InMemoryDeadLetter::length(self : InMemoryDeadLetter) -> Int {
+pub fn InMemoryDeadLetter::length(self : InMemoryDeadLetter) -> Int32 {
   self.entries.length()
 }
 
